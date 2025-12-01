@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Draconiques{% endblock %}
+
+{% block body %}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-white mb-2">Tableaux de bord</h2>
+    <p class="text-slate-400">Analyse des données biométriques et historiques des dragons.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
+        <h3 class="text-xl font-semibold mb-4 text-red-400">Répartition par Élément</h3>
+        <div class="h-40 bg-slate-700/50 rounded flex items-center justify-center">
+            <span class="text-sm text-slate-500">[ PieChart Placeholder ]</span>
+        </div>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
+        <h3 class="text-xl font-semibold mb-4 text-red-400">Envergure vs Âge</h3>
+        <div class="h-40 bg-slate-700/50 rounded flex items-center justify-center">
+            <span class="text-sm text-slate-500">[ ScatterPlot Placeholder ]</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,16 +2,47 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <title>{% block title %}Dragon Data CMS{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🐉</text></svg>">
+        
+        {# Import CDN Tailwind CSS #}
+        <script src="https://cdn.tailwindcss.com"></script>
+        
         {% block stylesheets %}
         {% endblock %}
 
         {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <body class="bg-slate-900 text-slate-200 font-sans antialiased">
+        
+        {# Navigation Temporaire #}
+        <nav class="bg-slate-800 border-b border-slate-700 p-4 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto flex justify-between items-center">
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl">🐉</span>
+                    <a href="{{ path('app_home') }}" class="text-2xl font-bold text-red-500 hover:text-red-400 transition">DragonCMS</a>
+                </div>
+
+                <ul class="hidden md:flex space-x-8 text-slate-300 font-medium">
+                    <li><a href="{{ path('app_home') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Accueil</a></li>
+                    <li><a href="{{ path('app_stats') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Statistiques</a></li>
+                    <li><a href="{{ path('app_forum') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Forum</a></li>
+                </ul>
+
+                <div>
+                    <a href="{{ path('app_login') }}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 transition text-sm">
+                        Connexion
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        {# Contenu des pages #}
+        <div class="container mx-auto py-10 px-4">
+            {% block body %}{% endblock %}
+        </div>
+        
     </body>
 </html>
