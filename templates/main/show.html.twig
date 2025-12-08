@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto py-10">
+    
+    {# Bouton Retour #}
+    <a href="{{ path('app_forum') }}" class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition">
+        ← Retour au forum
+    </a>
+
+    {# En-tête de l'article #}
+    <div class="bg-slate-800 p-8 rounded-t-lg border border-slate-700 border-b-0">
+        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 mb-4 break-words">
+            {{ article.title }}
+        </h1>
+        
+        <div class="flex items-center justify-between text-sm text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="bg-slate-700 px-2 py-1 rounded text-white font-bold">
+                    {# Correction : Vérification de l'auteur ici aussi #}
+                    {% if article.author %}
+                        {{ article.author.pseudo }}
+                    {% else %}
+                        Anonyme
+                    {% endif %}
+                </span>
+                <span>le {{ article.createdAt|date('d/m/Y à H:i') }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# Contenu Principal #}
+    <div class="bg-slate-900 border border-slate-700 p-8 rounded-b-lg min-h-[300px]">
+        
+        {# Introduction : Le résumé mis en valeur #}
+        <div class="text-xl text-slate-400 italic mb-8 border-l-4 border-red-500 pl-4 break-words">
+            {{ article.summary|nl2br }}
+        </div>
+
+        <hr class="border-slate-800 mb-8">
+
+        {# Boucle sur les blocs #}
+        <div class="space-y-6">
+            {# On utilise le filtre 'sort' pour être sûr qu'ils sont dans l'ordre de position #}
+            {% for bloc in article.blocs %}
+                
+                {# TYPE: TITRE H2 #}
+                {% if bloc.type == 'title_h2' %}
+                    <h2 class="text-2xl font-bold text-red-400 mt-8 mb-4 break-words">{{ bloc.content }}</h2>
+
+                {# TYPE: TEXTE #}
+                {% elseif bloc.type == 'text' %}
+                    {# On affiche le titre du bloc seulement s'il existe #}
+                    {% if bloc.title %}
+                        <h3 class="text-lg font-semibold text-slate-500 mt-4">{{ bloc.title }}</h3>
+                    {% endif %}
+                    <p class="text-slate-300 leading-relaxed text-lg text-justify break-words">{{ bloc.content|nl2br }}</p>
+
+                {# TYPE: IMAGE #}
+                {% elseif bloc.type == 'image' %}
+                    <figure class="my-6 bg-slate-800 p-2 rounded-lg border border-slate-700">
+                        {# On utilise le contenu comme URL de l'image #}
+                        <img src="{{ bloc.content }}" alt="{{ bloc.title }}" class="rounded shadow-lg w-full object-cover max-h-[500px]">
+                        {% if bloc.title %}
+                            <figcaption class="text-center text-slate-500 text-sm mt-2 italic">{{ bloc.title }}</figcaption>
+                        {% endif %}
+                    </figure>
+
+                {# TYPE: VISUALISATION (Placeholder pour le moment) #}
+                {% elseif bloc.type == 'viz' %}
+                    <div class="bg-slate-800 p-6 border border-slate-600 border-dashed rounded text-center py-10 my-6">
+                        <span class="text-4xl block mb-2">📊</span>
+                        <p class="text-red-400 font-mono">Visualisation de données : {{ bloc.title }}</p>
+                        <p class="text-slate-500 text-sm mt-2">(Le rendu React arrivera bientôt ici)</p>
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+            
+            {# Message si aucun bloc n'existe (anciens articles) #}
+            {% if article.blocs is empty %}
+                <p class="text-slate-600 text-center italic mt-10">Cet article ne contient pas encore de contenu détaillé.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

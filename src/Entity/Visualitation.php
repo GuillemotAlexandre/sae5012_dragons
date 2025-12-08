@@ -10,24 +10,60 @@ class Visualisation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 50)]
-    private ?string $chartType = null;
-
-    #[ORM\ManyToOne(targetEntity: Dataset::class, inversedBy: 'visualisations')]
-    private ?Dataset $dataset = null;
+    #[ORM\Column(length: 50)]
+    private ?string $type = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private array $variables = [];
+    private ?array $config = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private array $colors = [];
-
-    #[ORM\OneToOne(targetEntity: Bloc::class, inversedBy: 'visualisation')]
-    #[ORM\JoinColumn(nullable: true)]
+    // 👇 C'est cette relation qui manquait pour que setBloc fonctionne 👇
+    #[ORM\OneToOne(inversedBy: 'visualisation', targetEntity: Bloc::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Bloc $bloc = null;
 
-    // Getters & setters...
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getConfig(): ?array
+    {
+        return $this->config;
+    }
+
+    public function setConfig(?array $config): static
+    {
+        $this->config = $config;
+
+        return $this;
+    }
+
+    // 👇 Les méthodes Getter et Setter pour le Bloc 👇
+
+    public function getBloc(): ?Bloc
+    {
+        return $this->bloc;
+    }
+
+    public function setBloc(?Bloc $bloc): static
+    {
+        $this->bloc = $bloc;
+
+        return $this;
+    }
 }

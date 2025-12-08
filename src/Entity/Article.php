@@ -21,8 +21,12 @@ class Article
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $summary = null;
 
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Bloc::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $blocs;
+
+    // 👇 CORRECTION ICI : Ajout de ManyToOne manquant 👇
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $author = null;
 
     #[ORM\Column(type: 'datetime')]
@@ -34,6 +38,7 @@ class Article
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->blocs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -93,6 +98,34 @@ class Article
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bloc>
+     */
+    public function getBlocs(): Collection
+    {
+        return $this->blocs;
+    }
+
+    public function addBloc(Bloc $bloc): self
+    {
+        if (!$this->blocs->contains($bloc)) {
+            $this->blocs->add($bloc);
+            $bloc->setArticle($this); // Maintenant ça fonctionnera car setArticle existe dans Bloc !
+        }
+
+        return $this;
+    }
+
+    public function removeBloc(Bloc $bloc): self
+    {
+        if ($this->blocs->removeElement($bloc)) {
+            if ($bloc->getArticle() === $this) {
+                // orphanRemoval s'occupe de la suppression
+            }
+        }
         return $this;
     }
 }
