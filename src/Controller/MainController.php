@@ -69,6 +69,48 @@ class MainController extends AbstractController
                 }
             }
 
+            // Gestion Upload Images & CSV
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/blocs';
+            // Dossier pour les CSV
+            $csvDir = $this->getParameter('kernel.project_dir') . '/public/uploads/csv';
+            
+            if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
+            if (!file_exists($csvDir)) mkdir($csvDir, 0777, true);
+
+            foreach ($form->get('blocs') as $blocForm) {
+                $blocEntity = $blocForm->getData();
+                $type = $blocEntity->getType();
+
+                // 1. GESTION IMAGE
+                $imageFile = $blocForm->get('imageFile')->getData();
+                if ($imageFile && $type === 'image') {
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    try {
+                        $imageFile->move($uploadDir, $newFilename);
+                        $blocEntity->setContent('/uploads/blocs/' . $newFilename);
+                    } catch (\Exception $e) { /* Gérer erreur */ }
+                }
+
+                // 2. GESTION CSV / VISUALISATION
+                $csvFile = $blocForm->get('csvFile')->getData();
+                $vizType = $blocForm->get('vizType')->getData(); // ex: 'bar', 'pie'
+
+                if ($csvFile && $type === 'viz') {
+                    $newFilename = uniqid() . '.csv';
+                    try {
+                        $csvFile->move($csvDir, $newFilename);
+                        
+                        // ON SAUVEGARDE : "TYPE::CHEMIN"
+                        // Exemple en BDD : "bar::/uploads/csv/65a4b3.csv"
+                        $path = '/uploads/csv/' . $newFilename;
+                        $blocEntity->setContent($vizType . '::' . $path);
+                        
+                    } catch (\Exception $e) {
+                         $this->addFlash('error', 'Erreur upload CSV');
+                    }
+                }
+            }
+
             $em->persist($article);
             $em->flush();
             $this->addFlash('success', 'Votre parchemin a été publié !');

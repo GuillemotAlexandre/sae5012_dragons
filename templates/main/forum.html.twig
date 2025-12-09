@@ -86,42 +86,57 @@
                 const wrapper = document.querySelector('#blocs-wrapper');
                 const addBtn = document.querySelector('#add-bloc-btn');
 
-                // Fonction pour gérer l'affichage Texte vs Image
+                // Fonction pour gérer l'affichage dynamique des champs
                 function attachEvents(element) {
                     const select = element.querySelector('.js-type-selector');
-                    const contentField = element.querySelector('.js-content-field'); // Textarea
-                    const imageField = element.querySelector('.js-image-field');     // Input File
                     
-                    // Sécurité si les classes n'existent pas
-                    if (!select || !contentField || !imageField) return;
+                    const contentField = element.querySelector('.js-content-field'); // Textarea
+                    const imageField = element.querySelector('.js-image-field');     // Image
+                    const csvField = element.querySelector('.js-csv-field');         // CSV (Nouveau)
+                    const vizTypeField = element.querySelector('.js-viz-type-field');// Choix Graphique (Nouveau)
+                    
+                    if (!select) return;
 
-                    // Fonction interne pour basculer
                     const toggleFields = () => {
                         const val = select.value;
-                        // On remonte au parent (div) pour cacher tout le champ (label inclus)
-                        const contentContainer = contentField.closest('div'); 
-                        const imageContainer = imageField.closest('div');
+                        
+                        // 1. On cache tout par défaut
+                        // On remonte au parent (.mb-2 ou div) pour cacher tout le bloc (label inclus) si possible
+                        if(contentField) contentField.closest('div').classList.add('hidden');
+                        if(imageField) imageField.closest('div').classList.add('hidden');
+                        
+                        // Pour CSV et VizType, on vérifie s'ils existent (car ils sont mapped: false)
+                        if(csvField) csvField.closest('div').classList.add('hidden');
+                        if(vizTypeField) vizTypeField.closest('div').classList.add('hidden');
 
-                        if (val === 'image') {
-                            // Si Image : On cache le texte, on montre l'upload
-                            if(contentContainer) contentContainer.classList.add('hidden');
-                            if(imageContainer) imageContainer.classList.remove('hidden');
-                            imageField.classList.remove('hidden'); // Sécurité
-                        } else {
-                            // Sinon : On montre le texte, on cache l'upload
-                            if(contentContainer) contentContainer.classList.remove('hidden');
-                            if(imageContainer) imageContainer.classList.add('hidden');
+                        // 2. On affiche selon le choix
+                        if (val === 'text' || val === 'title_h2') {
+                            if(contentField) contentField.closest('div').classList.remove('hidden');
+                        } 
+                        else if (val === 'image') {
+                            if(imageField) {
+                                imageField.closest('div').classList.remove('hidden');
+                                imageField.classList.remove('hidden'); // Sécurité
+                            }
+                        } 
+                        // 👇 C'EST ICI QUE ÇA CHANGEAIT 👇
+                        else if (val === 'viz') {
+                            if(csvField) {
+                                csvField.closest('div').classList.remove('hidden');
+                                csvField.classList.remove('hidden');
+                            }
+                            if(vizTypeField) {
+                                vizTypeField.closest('div').classList.remove('hidden');
+                                vizTypeField.classList.remove('hidden');
+                            }
                         }
                     };
 
-                    // Écouter le changement sur le selecteur (H2, Texte, Image...)
                     select.addEventListener('change', toggleFields);
-                    
-                    // Lancer une fois au démarrage pour initialiser l'état
-                    toggleFields();
+                    toggleFields(); // Init au chargement
                 }
 
-                // Initialiser sur les blocs existants (s'il y en a)
+                // Initialiser sur les blocs existants
                 document.querySelectorAll('.bloc-item').forEach(attachEvents);
                 
                 // Gérer le clic sur "Ajouter un bloc"
@@ -135,7 +150,6 @@
                     div.innerHTML = newForm;
                     div.classList.add('bg-slate-900', 'p-4', 'rounded', 'mb-4', 'border', 'border-slate-600', 'mt-4', 'relative', 'bloc-item');
                     
-                    // Bouton de suppression
                     const removeBtn = document.createElement('button');
                     removeBtn.textContent = "Supprimer";
                     removeBtn.type = "button";
@@ -146,14 +160,13 @@
                     wrapper.appendChild(div);
                     wrapper.dataset.index = parseInt(index) + 1;
 
-                    // Attacher les événements (toggle image/texte) au nouveau bloc
+                    // Attacher les événements au nouveau bloc
                     attachEvents(div);
                 });
             });
         </script>
 
     {% else %}
-        {# Affichage pour les visiteurs non connectés #}
         <div class="bg-slate-800/50 border border-dashed border-slate-600 p-6 rounded-lg text-center mb-10">
             <p class="text-slate-400 mb-3">Vous devez être membre de la guilde pour publier.</p>
             <a href="{{ path('app_login') }}" class="text-red-400 font-bold hover:underline">Se connecter</a>

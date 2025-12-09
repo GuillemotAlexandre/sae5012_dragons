@@ -2,6 +2,12 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
+{# 👇 IMPORT DES LIBRAIRIES POUR LES GRAPHIQUES 👇 #}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+{% endblock %}
+
 {% block body %}
 <div class="max-w-4xl mx-auto py-10">
     
@@ -26,7 +32,6 @@
             {# ⭐ SYSTÈME DE NOTATION ⭐ #}
             <div class="bg-slate-900 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-3">
                 <div class="text-yellow-400 font-bold text-lg">
-                    {# On utilise la méthode getAverageRating définie dans l'entité #}
                     {% set avg = article.averageRating %}
                     {% if avg %}
                         {{ avg }} <span class="text-xs text-slate-500">/ 5</span>
@@ -37,7 +42,6 @@
                 
                 {% if app.user %}
                 <div class="flex gap-1">
-                    {# Boucle pour afficher 5 étoiles cliquables #}
                     {% for i in 1..5 %}
                         <a href="{{ path('app_article_rate', {id: article.id, score: i}) }}" 
                            class="text-xl transition hover:scale-125 {% if avg and i <= avg|round %}text-yellow-400{% else %}text-slate-600 hover:text-yellow-200{% endif %}"
@@ -64,13 +68,17 @@
         {# Blocs Dynamiques #}
         <div class="space-y-6">
             {% for bloc in article.blocs %}
+                
+                {# TITRE H2 #}
                 {% if bloc.type == 'title_h2' %}
                     <h2 class="text-2xl font-bold text-red-400 mt-8 mb-4 break-words">{{ bloc.content }}</h2>
                 
+                {# TEXTE #}
                 {% elseif bloc.type == 'text' %}
                     {% if bloc.title %}<h3 class="text-lg font-semibold text-slate-500 mt-4">{{ bloc.title }}</h3>{% endif %}
                     <p class="text-slate-300 leading-relaxed text-lg text-justify break-words">{{ bloc.content|nl2br }}</p>
                 
+                {# IMAGE #}
                 {% elseif bloc.type == 'image' %}
                     <figure class="my-6 bg-slate-800 p-2 rounded-lg border border-slate-700">
                         <img src="{{ bloc.content }}" alt="{{ bloc.title }}" class="rounded shadow-lg w-full object-cover max-h-[500px]">
@@ -79,12 +87,102 @@
                         {% endif %}
                     </figure>
                 
+                {# 👇 VISUALISATION (GRAPHIQUE) 👇 #}
                 {% elseif bloc.type == 'viz' %}
-                     <div class="bg-slate-800 p-6 border border-slate-600 border-dashed rounded text-center py-10 my-6">
-                        <span class="text-4xl block mb-2">📊</span>
-                        <p class="text-red-400 font-mono">Visualisation : {{ bloc.title }}</p>
-                        <p class="text-slate-500 text-sm mt-2">(Intégration React à venir)</p>
+                    {# Récupération type et chemin : "bar::/uploads/csv/..." #}
+                    {% set parts = bloc.content|split('::') %}
+                    {% set vizType = parts[0] %}
+                    {% set csvPath = parts[1] %}
+
+                    <div class="bg-slate-800 p-4 border border-slate-700 rounded-lg shadow-lg my-8">
+                        {% if bloc.title %}
+                            <h3 class="text-center text-xl font-bold text-white mb-4">{{ bloc.title }}</h3>
+                        {% endif %}
+                        
+                        {# Canevas Chart.js #}
+                        <div class="relative h-[400px] w-full">
+                            <canvas id="chart-{{ bloc.id }}"></canvas>
+                        </div>
+                        
+                        <div class="text-center mt-2">
+                            <a href="{{ csvPath }}" class="text-xs text-slate-500 hover:text-red-400 underline" download>Télécharger les données (CSV)</a>
+                        </div>
                     </div>
+
+                    {# Script JS pour générer CE graphique #}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const csvUrl = "{{ csvPath }}";
+                            const chartId = "chart-{{ bloc.id }}";
+                            const chartType = "{{ vizType }}"; // bar, pie, line...
+
+                            // Lecture du CSV
+                            Papa.parse(csvUrl, {
+                                download: true,
+                                header: false, // On suppose: Col1=Label, Col2=Valeur
+                                delimiter: ";", // Séparateur Excel par défaut
+                                skipEmptyLines: true,
+                                complete: function(results) {
+                                    const data = results.data;
+                                    let labels = [];
+                                    let values = [];
+                                    
+                                    data.forEach(row => {
+                                        // On vérifie qu'on a bien 2 colonnes et que la 2ème est un nombre
+                                        if(row.length >= 2) {
+                                            // Nettoyage de la valeur (remplacer virgule par point)
+                                            let valStr = row[1].toString().replace(',', '.').trim();
+                                            if(!isNaN(parseFloat(valStr))) {
+                                                labels.push(row[0]);
+                                                values.push(parseFloat(valStr));
+                                            }
+                                        }
+                                    });
+
+                                    // Création du Chart
+                                    const ctx = document.getElementById(chartId).getContext('2d');
+                                    new Chart(ctx, {
+                                        type: chartType,
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                label: 'Données',
+                                                data: values,
+                                                backgroundColor: [
+                                                    'rgba(239, 68, 68, 0.7)', // Red
+                                                    'rgba(249, 115, 22, 0.7)', // Orange
+                                                    'rgba(234, 179, 8, 0.7)',  // Yellow
+                                                    'rgba(34, 197, 94, 0.7)',  // Green
+                                                    'rgba(59, 130, 246, 0.7)', // Blue
+                                                    'rgba(168, 85, 247, 0.7)'  // Purple
+                                                ],
+                                                borderColor: 'rgba(255, 255, 255, 0.5)',
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: { labels: { color: 'white' } }
+                                            },
+                                            scales: {
+                                                y: { 
+                                                    ticks: { color: '#94a3b8' }, 
+                                                    grid: { color: '#334155' },
+                                                    beginAtZero: true
+                                                },
+                                                x: { 
+                                                    ticks: { color: '#94a3b8' }, 
+                                                    grid: { color: '#334155' } 
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    </script>
                 {% endif %}
             {% endfor %}
         </div>
@@ -94,7 +192,6 @@
     <div class="border-t border-slate-700 pt-10">
         <h3 class="text-2xl font-bold text-white mb-6">Discussions ({{ article.comments|length }})</h3>
 
-        {# Formulaire Nouveau Commentaire Principal #}
         {% if app.user %}
             <div class="bg-slate-800 p-4 rounded mb-8 border border-slate-700">
                 {{ form_start(commentForm) }}
@@ -110,11 +207,9 @@
             </div>
         {% endif %}
 
-        {# --- 4. MACRO POUR L'AFFICHAGE RECURSIF DES RÉPONSES --- #}
+        {# MACRO RECURSIVE #}
         {% macro display_comment(comment, article_id, level = 0) %}
             <div class="flex gap-3 mb-4 {% if level > 0 %}ml-8 border-l-2 border-slate-700 pl-4{% endif %}" id="comment-{{ comment.id }}">
-                
-                {# VOTES (Gauche) #}
                 <div class="flex flex-col items-center gap-1 pt-1 min-w-[30px]">
                     <a href="{{ path('app_comment_vote', {id: comment.id, direction: 'up'}) }}" class="text-slate-500 hover:text-orange-500 transition font-bold text-lg leading-none">▲</a>
                     <span class="font-bold text-sm {% if comment.score > 0 %}text-orange-400{% elseif comment.score < 0 %}text-blue-400{% else %}text-slate-400{% endif %}">
@@ -122,29 +217,20 @@
                     </span>
                     <a href="{{ path('app_comment_vote', {id: comment.id, direction: 'down'}) }}" class="text-slate-500 hover:text-blue-500 transition font-bold text-lg leading-none">▼</a>
                 </div>
-
-                {# CONTENU (Droite) #}
                 <div class="flex-1">
                     <div class="flex items-baseline gap-2 mb-1">
                         <span class="font-bold text-slate-200 text-sm">{{ comment.author.pseudo }}</span>
                         <span class="text-xs text-slate-500">{{ comment.createdAt|date('d/m H:i') }}</span>
                     </div>
-                    
                     <p class="text-slate-300 text-sm leading-relaxed mb-2 break-words">{{ comment.content }}</p>
-
-                    {# BOUTON RÉPONDRE (Visible si connecté) #}
                     {% if app.user %}
                     <button onclick="toggleReplyForm({{ comment.id }})" class="text-xs text-slate-500 font-bold hover:text-white flex items-center gap-1 mb-2">
                         <span>💬</span> Répondre
                     </button>
-
-                    {# FORMULAIRE DE RÉPONSE (Caché par défaut) #}
                     <div id="reply-form-{{ comment.id }}" class="hidden mt-2 mb-4 bg-slate-800 p-3 rounded border border-slate-600">
                         <form action="{{ path('app_article_show', {id: article_id}) }}" method="post">
                             <textarea name="comment[content]" rows="2" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm mb-2 focus:ring-1 focus:ring-red-500 outline-none" placeholder="Votre réponse..."></textarea>
-                            {# ID du parent #}
                             <input type="hidden" name="comment[parentid]" value="{{ comment.id }}">
-                            {# Token CSRF #}
                             <input type="hidden" name="comment[_token]" value="{{ csrf_token('comment') }}">
                             <div class="flex justify-end">
                                 <button type="submit" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded transition font-bold">Envoyer</button>
@@ -152,8 +238,6 @@
                         </form>
                     </div>
                     {% endif %}
-
-                    {# RECURSION : Afficher les enfants #}
                     {% if comment.replies is not empty %}
                         <div class="mt-2">
                             {% for reply in comment.replies %}
@@ -165,7 +249,7 @@
             </div>
         {% endmacro %}
 
-        {# APPEL DE LA MACRO (Pour les commentaires racines uniquement) #}
+        {# APPEL MACRO #}
         {% for comment in article.comments %}
             {% if comment.parent is null %}
                 {{ _self.display_comment(comment, article.id) }}
@@ -175,11 +259,9 @@
                 Aucun commentaire pour le moment. Soyez le premier à réagir !
             </p>
         {% endfor %}
-
     </div>
 </div>
 
-{# SCRIPT POUR AFFICHER/CACHER LE FORMULAIRE DE RÉPONSE #}
 <script>
     function toggleReplyForm(id) {
         const form = document.getElementById('reply-form-' + id);
