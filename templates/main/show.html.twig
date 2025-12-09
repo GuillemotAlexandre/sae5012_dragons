@@ -2,7 +2,7 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
-{# 👇 IMPORT DES LIBRAIRIES POUR LES GRAPHIQUES 👇 #}
+{# Imports pour les graphiques (Chart.js) #}
 {% block javascripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -14,6 +14,26 @@
     <a href="{{ path('app_forum') }}" class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition">
         ← Retour au forum
     </a>
+
+    {# 👇 ÉTAPE 3 : LECTEUR AUDIO 👇 #}
+    {% if article.music %}
+        <div class="bg-slate-800 border border-slate-600 p-4 rounded-lg mb-6 flex items-center justify-between shadow-lg">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🎵</span>
+                <div>
+                    <p class="text-white font-bold text-sm">Ambiance Sonore</p>
+                    <p class="text-slate-400 text-xs">Profitez de la lecture en musique</p>
+                </div>
+            </div>
+            {# Le lecteur audio HTML5 standard #}
+            <audio controls autoplay controlsList="nodownload" class="h-10 w-64 rounded-full bg-slate-200">
+                {# asset() cherche dans le dossier public/ #}
+                <source src="{{ asset('musique/' ~ article.music) }}" type="audio/mpeg">
+                Votre navigateur ne supporte pas l'élément audio.
+            </audio>
+        </div>
+    {% endif %}
+    {# 👆 FIN LECTEUR AUDIO 👆 #}
 
     {# --- 1. EN-TÊTE ARTICLE + NOTATION --- #}
     <div class="bg-slate-800 p-8 rounded-t-lg border border-slate-700 border-b-0 relative">
@@ -87,9 +107,8 @@
                         {% endif %}
                     </figure>
                 
-                {# 👇 VISUALISATION (GRAPHIQUE) 👇 #}
+                {# VISUALISATION (GRAPHIQUE) #}
                 {% elseif bloc.type == 'viz' %}
-                    {# Récupération type et chemin : "bar::/uploads/csv/..." #}
                     {% set parts = bloc.content|split('::') %}
                     {% set vizType = parts[0] %}
                     {% set csvPath = parts[1] %}
@@ -98,29 +117,24 @@
                         {% if bloc.title %}
                             <h3 class="text-center text-xl font-bold text-white mb-4">{{ bloc.title }}</h3>
                         {% endif %}
-                        
-                        {# Canevas Chart.js #}
                         <div class="relative h-[400px] w-full">
                             <canvas id="chart-{{ bloc.id }}"></canvas>
                         </div>
-                        
                         <div class="text-center mt-2">
                             <a href="{{ csvPath }}" class="text-xs text-slate-500 hover:text-red-400 underline" download>Télécharger les données (CSV)</a>
                         </div>
                     </div>
 
-                    {# Script JS pour générer CE graphique #}
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
                             const csvUrl = "{{ csvPath }}";
                             const chartId = "chart-{{ bloc.id }}";
-                            const chartType = "{{ vizType }}"; // bar, pie, line...
+                            const chartType = "{{ vizType }}";
 
-                            // Lecture du CSV
                             Papa.parse(csvUrl, {
                                 download: true,
-                                header: false, // On suppose: Col1=Label, Col2=Valeur
-                                delimiter: ";", // Séparateur Excel par défaut
+                                header: false,
+                                delimiter: ";",
                                 skipEmptyLines: true,
                                 complete: function(results) {
                                     const data = results.data;
@@ -128,9 +142,7 @@
                                     let values = [];
                                     
                                     data.forEach(row => {
-                                        // On vérifie qu'on a bien 2 colonnes et que la 2ème est un nombre
                                         if(row.length >= 2) {
-                                            // Nettoyage de la valeur (remplacer virgule par point)
                                             let valStr = row[1].toString().replace(',', '.').trim();
                                             if(!isNaN(parseFloat(valStr))) {
                                                 labels.push(row[0]);
@@ -139,7 +151,6 @@
                                         }
                                     });
 
-                                    // Création du Chart
                                     const ctx = document.getElementById(chartId).getContext('2d');
                                     new Chart(ctx, {
                                         type: chartType,
@@ -148,14 +159,7 @@
                                             datasets: [{
                                                 label: 'Données',
                                                 data: values,
-                                                backgroundColor: [
-                                                    'rgba(239, 68, 68, 0.7)', // Red
-                                                    'rgba(249, 115, 22, 0.7)', // Orange
-                                                    'rgba(234, 179, 8, 0.7)',  // Yellow
-                                                    'rgba(34, 197, 94, 0.7)',  // Green
-                                                    'rgba(59, 130, 246, 0.7)', // Blue
-                                                    'rgba(168, 85, 247, 0.7)'  // Purple
-                                                ],
+                                                backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(249, 115, 22, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(34, 197, 94, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(168, 85, 247, 0.7)'],
                                                 borderColor: 'rgba(255, 255, 255, 0.5)',
                                                 borderWidth: 1
                                             }]
@@ -163,19 +167,10 @@
                                         options: {
                                             responsive: true,
                                             maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: { labels: { color: 'white' } }
-                                            },
+                                            plugins: { legend: { labels: { color: 'white' } } },
                                             scales: {
-                                                y: { 
-                                                    ticks: { color: '#94a3b8' }, 
-                                                    grid: { color: '#334155' },
-                                                    beginAtZero: true
-                                                },
-                                                x: { 
-                                                    ticks: { color: '#94a3b8' }, 
-                                                    grid: { color: '#334155' } 
-                                                }
+                                                y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' }, beginAtZero: true },
+                                                x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
                                             }
                                         }
                                     });
@@ -207,7 +202,7 @@
             </div>
         {% endif %}
 
-        {# MACRO RECURSIVE #}
+        {# MACRO RECURSIVE COMMENTAIRES #}
         {% macro display_comment(comment, article_id, level = 0) %}
             <div class="flex gap-3 mb-4 {% if level > 0 %}ml-8 border-l-2 border-slate-700 pl-4{% endif %}" id="comment-{{ comment.id }}">
                 <div class="flex flex-col items-center gap-1 pt-1 min-w-[30px]">
@@ -249,7 +244,6 @@
             </div>
         {% endmacro %}
 
-        {# APPEL MACRO #}
         {% for comment in article.comments %}
             {% if comment.parent is null %}
                 {{ _self.display_comment(comment, article.id) }}

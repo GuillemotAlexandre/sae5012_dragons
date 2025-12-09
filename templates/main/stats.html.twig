@@ -1,26 +1,148 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Statistiques Draconiques{% endblock %}
+{% block title %}Statistiques de l'Archipel{% endblock %}
+
+{% block javascripts %}
+    {# Import des librairies graphiques #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+{% endblock %}
 
 {% block body %}
-<div class="mb-8">
-    <h2 class="text-3xl font-bold text-white mb-2">Tableaux de bord</h2>
-    <p class="text-slate-400">Analyse des données biométriques et historiques des dragons.</p>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
-        <h3 class="text-xl font-semibold mb-4 text-red-400">Répartition par Élément</h3>
-        <div class="h-40 bg-slate-700/50 rounded flex items-center justify-center">
-            <span class="text-sm text-slate-500">[ PieChart Placeholder ]</span>
-        </div>
+<div class="max-w-6xl mx-auto py-10">
+    
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 mb-4">
+            L'Observatoire de Berk
+        </h1>
+        <p class="text-slate-400 text-lg">
+            Analyses des données cinématographiques et recensement démographique de l'archipel.
+        </p>
     </div>
 
-    <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
-        <h3 class="text-xl font-semibold mb-4 text-red-400">Envergure vs Âge</h3>
-        <div class="h-40 bg-slate-700/50 rounded flex items-center justify-center">
-            <span class="text-sm text-slate-500">[ ScatterPlot Placeholder ]</span>
+    <!-- GRILLE DES GRAPHIQUES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- GRAPHIQUE 1 : BOX OFFICE (Bar Chart) -->
+        <div class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                🎬 Succès de la Saga
+            </h3>
+            <div class="relative h-64">
+                <canvas id="chart-box-office"></canvas>
+            </div>
+            <p class="text-sm text-slate-500 mt-4 text-center italic">Recettes mondiales en millions de dollars.</p>
         </div>
+
+        <!-- GRAPHIQUE 2 : DEMOGRAPHIE (Pie Chart) -->
+        <div class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                🏘️ Démographie de Berk
+            </h3>
+            <div class="relative h-64">
+                <canvas id="chart-population"></canvas>
+            </div>
+            <p class="text-sm text-slate-500 mt-4 text-center italic">Répartition des habitants sur l'île.</p>
+        </div>
+
+        <!-- GRAPHIQUE 3 : TIMELINE (Line Chart) - Prend toute la largeur -->
+        <div class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 md:col-span-2">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                🐉 Expansion des Connaissances
+            </h3>
+            <div class="relative h-80">
+                <canvas id="chart-timeline"></canvas>
+            </div>
+            <p class="text-sm text-slate-500 mt-4 text-center italic">Évolution du nombre d'espèces de dragons découvertes au fil du temps.</p>
+        </div>
+
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Fonction générique pour charger un CSV et créer un chart
+        function createChartFromCSV(csvUrl, canvasId, chartType, labelCol, dataCol, chartLabel, colors) {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true, // On utilise la première ligne comme header
+                delimiter: ";",
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const labels = data.map(item => item[Object.keys(item)[labelCol]]); // Colonne X
+                    const values = data.map(item => item[Object.keys(item)[dataCol]]);  // Colonne Y
+
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    
+                    new Chart(ctx, {
+                        type: chartType,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: chartLabel,
+                                data: values,
+                                backgroundColor: colors,
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 1,
+                                fill: chartType === 'line' ? true : false,
+                                tension: 0.4 // Courbe un peu arrondie pour le Line Chart
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#cbd5e1' } }
+                            },
+                            scales: {
+                                y: { 
+                                    ticks: { color: '#94a3b8' }, 
+                                    grid: { color: '#334155' },
+                                    beginAtZero: true 
+                                },
+                                x: { 
+                                    ticks: { color: '#94a3b8' }, 
+                                    grid: { color: '#334155' } 
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // 1. BOX OFFICE (Bar Chart)
+        createChartFromCSV(
+            "{{ asset('data/stats/box_office.csv') }}", 
+            'chart-box-office', 
+            'bar', 
+            0, 1, // Col 0 = Film, Col 1 = $$
+            'Box Office (M$)',
+            ['rgba(239, 68, 68, 0.8)', 'rgba(249, 115, 22, 0.8)', 'rgba(234, 179, 8, 0.8)'] // Couleurs chaudes
+        );
+
+        // 2. POPULATION (Doughnut Chart)
+        createChartFromCSV(
+            "{{ asset('data/stats/berk_population.csv') }}", 
+            'chart-population', 
+            'doughnut', 
+            0, 1, 
+            'Population',
+            ['#3b82f6', '#ef4444', '#22c55e', '#eab308'] // Bleu, Rouge, Vert, Jaune
+        );
+
+        // 3. TIMELINE (Line Chart)
+        createChartFromCSV(
+            "{{ asset('data/stats/dragons_timeline.csv') }}", 
+            'chart-timeline', 
+            'line', 
+            0, 1, 
+            'Espèces Découvertes',
+            'rgba(168, 85, 247, 0.5)' // Violet transparent
+        );
+
+    });
+</script>
 {% endblock %}
