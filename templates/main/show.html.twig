@@ -5,87 +5,185 @@
 {% block body %}
 <div class="max-w-4xl mx-auto py-10">
     
-    {# Bouton Retour #}
     <a href="{{ path('app_forum') }}" class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition">
         ← Retour au forum
     </a>
 
-    {# En-tête de l'article #}
-    <div class="bg-slate-800 p-8 rounded-t-lg border border-slate-700 border-b-0">
+    {# --- 1. EN-TÊTE ARTICLE + NOTATION --- #}
+    <div class="bg-slate-800 p-8 rounded-t-lg border border-slate-700 border-b-0 relative">
         <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 mb-4 break-words">
             {{ article.title }}
         </h1>
         
-        <div class="flex items-center justify-between text-sm text-slate-400">
-            <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-slate-400">
                 <span class="bg-slate-700 px-2 py-1 rounded text-white font-bold">
-                    {# Correction : Vérification de l'auteur ici aussi #}
-                    {% if article.author %}
-                        {{ article.author.pseudo }}
-                    {% else %}
-                        Anonyme
-                    {% endif %}
+                    {% if article.author %}{{ article.author.pseudo }}{% else %}Anonyme{% endif %}
                 </span>
                 <span>le {{ article.createdAt|date('d/m/Y à H:i') }}</span>
+            </div>
+
+            {# ⭐ SYSTÈME DE NOTATION ⭐ #}
+            <div class="bg-slate-900 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-3">
+                <div class="text-yellow-400 font-bold text-lg">
+                    {# On utilise la méthode getAverageRating définie dans l'entité #}
+                    {% set avg = article.averageRating %}
+                    {% if avg %}
+                        {{ avg }} <span class="text-xs text-slate-500">/ 5</span>
+                    {% else %}
+                        <span class="text-xs text-slate-500">Pas de note</span>
+                    {% endif %}
+                </div>
+                
+                {% if app.user %}
+                <div class="flex gap-1">
+                    {# Boucle pour afficher 5 étoiles cliquables #}
+                    {% for i in 1..5 %}
+                        <a href="{{ path('app_article_rate', {id: article.id, score: i}) }}" 
+                           class="text-xl transition hover:scale-125 {% if avg and i <= avg|round %}text-yellow-400{% else %}text-slate-600 hover:text-yellow-200{% endif %}"
+                           title="Donner {{ i }} étoiles">
+                           ★
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    {# Contenu Principal #}
-    <div class="bg-slate-900 border border-slate-700 p-8 rounded-b-lg min-h-[300px]">
+    {# --- 2. CONTENU DE L'ARTICLE (Blocs) --- #}
+    <div class="bg-slate-900 border border-slate-700 p-8 rounded-b-lg min-h-[300px] mb-12">
         
-        {# Introduction : Le résumé mis en valeur #}
+        {# Résumé (Intro) #}
         <div class="text-xl text-slate-400 italic mb-8 border-l-4 border-red-500 pl-4 break-words">
             {{ article.summary|nl2br }}
         </div>
-
+        
         <hr class="border-slate-800 mb-8">
-
-        {# Boucle sur les blocs #}
+        
+        {# Blocs Dynamiques #}
         <div class="space-y-6">
-            {# On utilise le filtre 'sort' pour être sûr qu'ils sont dans l'ordre de position #}
             {% for bloc in article.blocs %}
-                
-                {# TYPE: TITRE H2 #}
                 {% if bloc.type == 'title_h2' %}
                     <h2 class="text-2xl font-bold text-red-400 mt-8 mb-4 break-words">{{ bloc.content }}</h2>
-
-                {# TYPE: TEXTE #}
+                
                 {% elseif bloc.type == 'text' %}
-                    {# On affiche le titre du bloc seulement s'il existe #}
-                    {% if bloc.title %}
-                        <h3 class="text-lg font-semibold text-slate-500 mt-4">{{ bloc.title }}</h3>
-                    {% endif %}
+                    {% if bloc.title %}<h3 class="text-lg font-semibold text-slate-500 mt-4">{{ bloc.title }}</h3>{% endif %}
                     <p class="text-slate-300 leading-relaxed text-lg text-justify break-words">{{ bloc.content|nl2br }}</p>
-
-                {# TYPE: IMAGE #}
+                
                 {% elseif bloc.type == 'image' %}
                     <figure class="my-6 bg-slate-800 p-2 rounded-lg border border-slate-700">
-                        {# On utilise le contenu comme URL de l'image #}
                         <img src="{{ bloc.content }}" alt="{{ bloc.title }}" class="rounded shadow-lg w-full object-cover max-h-[500px]">
                         {% if bloc.title %}
                             <figcaption class="text-center text-slate-500 text-sm mt-2 italic">{{ bloc.title }}</figcaption>
                         {% endif %}
                     </figure>
-
-                {# TYPE: VISUALISATION (Placeholder pour le moment) #}
+                
                 {% elseif bloc.type == 'viz' %}
-                    <div class="bg-slate-800 p-6 border border-slate-600 border-dashed rounded text-center py-10 my-6">
+                     <div class="bg-slate-800 p-6 border border-slate-600 border-dashed rounded text-center py-10 my-6">
                         <span class="text-4xl block mb-2">📊</span>
-                        <p class="text-red-400 font-mono">Visualisation de données : {{ bloc.title }}</p>
-                        <p class="text-slate-500 text-sm mt-2">(Le rendu React arrivera bientôt ici)</p>
+                        <p class="text-red-400 font-mono">Visualisation : {{ bloc.title }}</p>
+                        <p class="text-slate-500 text-sm mt-2">(Intégration React à venir)</p>
                     </div>
-
                 {% endif %}
-
             {% endfor %}
-            
-            {# Message si aucun bloc n'existe (anciens articles) #}
-            {% if article.blocs is empty %}
-                <p class="text-slate-600 text-center italic mt-10">Cet article ne contient pas encore de contenu détaillé.</p>
-            {% endif %}
         </div>
     </div>
 
+    {# --- 3. SECTION COMMENTAIRES --- #}
+    <div class="border-t border-slate-700 pt-10">
+        <h3 class="text-2xl font-bold text-white mb-6">Discussions ({{ article.comments|length }})</h3>
+
+        {# Formulaire Nouveau Commentaire Principal #}
+        {% if app.user %}
+            <div class="bg-slate-800 p-4 rounded mb-8 border border-slate-700">
+                {{ form_start(commentForm) }}
+                    {{ form_widget(commentForm.content) }}
+                    <div class="flex justify-end mt-2">
+                        {{ form_widget(commentForm.submit) }}
+                    </div>
+                {{ form_end(commentForm) }}
+            </div>
+        {% else %}
+            <div class="bg-slate-800/50 p-4 rounded text-center text-slate-400 mb-8">
+                <a href="{{ path('app_login') }}" class="text-red-400 font-bold">Connectez-vous</a> pour rejoindre le débat.
+            </div>
+        {% endif %}
+
+        {# --- 4. MACRO POUR L'AFFICHAGE RECURSIF DES RÉPONSES --- #}
+        {% macro display_comment(comment, article_id, level = 0) %}
+            <div class="flex gap-3 mb-4 {% if level > 0 %}ml-8 border-l-2 border-slate-700 pl-4{% endif %}" id="comment-{{ comment.id }}">
+                
+                {# VOTES (Gauche) #}
+                <div class="flex flex-col items-center gap-1 pt-1 min-w-[30px]">
+                    <a href="{{ path('app_comment_vote', {id: comment.id, direction: 'up'}) }}" class="text-slate-500 hover:text-orange-500 transition font-bold text-lg leading-none">▲</a>
+                    <span class="font-bold text-sm {% if comment.score > 0 %}text-orange-400{% elseif comment.score < 0 %}text-blue-400{% else %}text-slate-400{% endif %}">
+                        {{ comment.score }}
+                    </span>
+                    <a href="{{ path('app_comment_vote', {id: comment.id, direction: 'down'}) }}" class="text-slate-500 hover:text-blue-500 transition font-bold text-lg leading-none">▼</a>
+                </div>
+
+                {# CONTENU (Droite) #}
+                <div class="flex-1">
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <span class="font-bold text-slate-200 text-sm">{{ comment.author.pseudo }}</span>
+                        <span class="text-xs text-slate-500">{{ comment.createdAt|date('d/m H:i') }}</span>
+                    </div>
+                    
+                    <p class="text-slate-300 text-sm leading-relaxed mb-2 break-words">{{ comment.content }}</p>
+
+                    {# BOUTON RÉPONDRE (Visible si connecté) #}
+                    {% if app.user %}
+                    <button onclick="toggleReplyForm({{ comment.id }})" class="text-xs text-slate-500 font-bold hover:text-white flex items-center gap-1 mb-2">
+                        <span>💬</span> Répondre
+                    </button>
+
+                    {# FORMULAIRE DE RÉPONSE (Caché par défaut) #}
+                    <div id="reply-form-{{ comment.id }}" class="hidden mt-2 mb-4 bg-slate-800 p-3 rounded border border-slate-600">
+                        <form action="{{ path('app_article_show', {id: article_id}) }}" method="post">
+                            <textarea name="comment[content]" rows="2" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm mb-2 focus:ring-1 focus:ring-red-500 outline-none" placeholder="Votre réponse..."></textarea>
+                            {# ID du parent #}
+                            <input type="hidden" name="comment[parentid]" value="{{ comment.id }}">
+                            {# Token CSRF #}
+                            <input type="hidden" name="comment[_token]" value="{{ csrf_token('comment') }}">
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded transition font-bold">Envoyer</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    {# RECURSION : Afficher les enfants #}
+                    {% if comment.replies is not empty %}
+                        <div class="mt-2">
+                            {% for reply in comment.replies %}
+                                {{ _self.display_comment(reply, article_id, level + 1) }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endmacro %}
+
+        {# APPEL DE LA MACRO (Pour les commentaires racines uniquement) #}
+        {% for comment in article.comments %}
+            {% if comment.parent is null %}
+                {{ _self.display_comment(comment, article.id) }}
+            {% endif %}
+        {% else %}
+            <p class="text-slate-500 italic mt-8 text-center border-dashed border border-slate-700 p-4 rounded">
+                Aucun commentaire pour le moment. Soyez le premier à réagir !
+            </p>
+        {% endfor %}
+
+    </div>
 </div>
+
+{# SCRIPT POUR AFFICHER/CACHER LE FORMULAIRE DE RÉPONSE #}
+<script>
+    function toggleReplyForm(id) {
+        const form = document.getElementById('reply-form-' + id);
+        form.classList.toggle('hidden');
+    }
+</script>
 {% endblock %}

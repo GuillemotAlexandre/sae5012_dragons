@@ -24,7 +24,6 @@ class Article
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Bloc::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $blocs;
 
-    // 👇 CORRECTION ICI : Ajout de ManyToOne manquant 👇
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $author = null;
@@ -35,10 +34,19 @@ class Article
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Comment::class, orphanRemoval: true)]
+    private Collection $comments;
+
+    // 👇 AJOUT DE LA RELATION RATINGS (Qui avait disparu) 👇
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Rating::class, orphanRemoval: true)]
+    private Collection $ratings;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->blocs = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,7 +121,7 @@ class Article
     {
         if (!$this->blocs->contains($bloc)) {
             $this->blocs->add($bloc);
-            $bloc->setArticle($this); // Maintenant ça fonctionnera car setArticle existe dans Bloc !
+            $bloc->setArticle($this);
         }
 
         return $this;
@@ -127,5 +135,80 @@ class Article
             }
         }
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            if ($comment->getArticle() === $this) {
+                // ...
+            }
+        }
+
+        return $this;
+    }
+
+    // 👇 GESTION DES NOTES (C'est ce qui manquait !) 👇
+
+    /**
+     * @return Collection<int, Rating>
+     */
+    public function getRatings(): Collection
+    {
+        return $this->ratings;
+    }
+
+    public function addRating(Rating $rating): static
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRating(Rating $rating): static
+    {
+        if ($this->ratings->removeElement($rating)) {
+            if ($rating->getArticle() === $this) {
+                // set the owning side to null (unless already changed)
+            }
+        }
+
+        return $this;
+    }
+
+    // Cette méthode est appelée par {{ article.averageRating }} dans Twig
+    public function getAverageRating(): ?float
+    {
+        if ($this->ratings->isEmpty()) {
+            return null;
+        }
+
+        $total = 0;
+        foreach ($this->ratings as $rating) {
+            $total += $rating->getValue();
+        }
+
+        return round($total / $this->ratings->count(), 1);
     }
 }
