@@ -32,9 +32,31 @@ class ArticleType extends AbstractType
                 // La clé est le texte affiché, la valeur est le chemin du fichier (relatif au dossier public/musique/)
                 'choices' => [
                     '-- Dragons 1 --' => [
-                        'This is Berk' => 'film1/01.This Is Berk How to Train Your Dragon OST.mp3',
-                        'Test Drive' => 'film1/test_drive.mp3',
-                        'Romantic Flight' => 'film1/romantic_flight.mp3',
+                        'This is Berk' => 'film1/01.This_Is_Berk.mp3',
+                        'Dragon Battle' => 'film1/02.Dragon_Battle.mp3',
+                        'The Downed Dragon' => 'film1/03.The_Downed_Dragon.mp3',
+                        'Dragon Training' => 'film1/04.Dragon_Training.mp3',
+                        'Wounded' => 'film1/05.Wounded.mp3',
+                        'The Dragon Book' => 'film1/06.The_Dragon_Book.mp3',
+                        'Focus' => 'film1/07.Focus.mp3',
+                        'Forbiden Friendship' => 'film1/08.Forbidden_Friendship.mp3',
+                        'New Tail' => 'film1/09.New_Tail.mp3',
+                        'Test Drive' => 'film1/11.Test_Drive.mp3',
+                        'Not So Fireproof' => 'film1/12.Not_So_Fireproof.mp3',
+                        'This Time for Sure' => 'film1/13.This_Time_For_Sure.mp3',
+                        'Astrid Goes For A Spin' => 'film1/14.Astrid_Goes_For_A_Spin.mp3',
+                        'Romantic Flight' => 'film1/15.Romantic_Flight.mp3',
+                        'Dragon\s Den' => 'film1/16.Dragons_Den.mp3',
+                        'The Cove' => 'film1/17.The_Cove.mp3',
+                        'The Kill Ring' => 'film1/18.The_Kill_Ring.mp3',
+                        'Ready The Ship' => 'film1/19.Ready_The_Ship.mp3',
+                        'Battling The Green Death' => 'film1/20.Battling_The_Green_Death.mp3',
+                        'Counter Attack' => 'film1/21.Counter_Attack.mp3',
+                        'Wheres Hiccup' => 'film1/22.Wheres_Hiccup.mp3',
+                        'Coming Back Around' => 'film1/23.Coming_Back_Around.mp3',
+                        'The Vikings Have Their Tea' => 'film1/24.The_Vikings_Have_Their_Tea.mp3',
+                        
+
                     ],
                     '-- Dragons 2 --' => [
                         'Where No One Goes' => 'film2/where_no_one_goes.mp3',
