@@ -2,7 +2,7 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
-{# Imports pour les graphiques (Chart.js) #}
+{# Imports pour les graphiques #}
 {% block javascripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -15,28 +15,132 @@
         ← Retour au forum
     </a>
 
-    {# 👇 ÉTAPE 3 : LECTEUR AUDIO 👇 #}
+    {# 👇 NOUVEAU LECTEUR AUDIO CUSTOMISÉ 👇 #}
     {% if article.music %}
-        <div class="bg-slate-800 border border-slate-600 p-4 rounded-lg mb-6 flex items-center justify-between shadow-lg">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">🎵</span>
-                <div>
-                    <p class="text-white font-bold text-sm">Ambiance Sonore</p>
-                    <p class="text-slate-400 text-xs">Profitez de la lecture en musique</p>
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 mb-8 shadow-xl relative overflow-hidden group">
+            
+            {# Effet de fond "Magie" #}
+            <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+
+            <div class="relative z-10 flex items-center gap-6">
+                
+                {# Bouton Play/Pause Circulaire #}
+                <button id="player-btn" class="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 flex items-center justify-center shadow-lg shadow-red-900/50 transition transform hover:scale-105 active:scale-95">
+                    {# Icône Play (cachée par défaut si autoplay marche) #}
+                    <svg id="icon-play" class="w-6 h-6 text-white ml-1 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    {# Icône Pause (visible par défaut) #}
+                    <svg id="icon-pause" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+
+                {# Infos Piste + Barre de progression #}
+                <div class="flex-1">
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <h4 class="text-white font-bold text-lg leading-none tracking-wide">Ambiance Draconique</h4>
+                            <p class="text-red-400 text-xs mt-1 uppercase font-semibold tracking-wider">Bande Originale</p>
+                        </div>
+                        <div class="text-slate-400 text-xs font-mono">
+                            <span id="current-time">0:00</span> / <span id="duration">--:--</span>
+                        </div>
+                    </div>
+
+                    {# Barre de progression interactive #}
+                    <div class="relative w-full h-2 bg-slate-800 rounded-full cursor-pointer group/bar" id="progress-container">
+                        {# Barre de chargement (arrière-plan) #}
+                        <div class="absolute top-0 left-0 h-full w-full rounded-full"></div>
+                        {# Barre de lecture (Rouge) #}
+                        <div id="progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-red-600 to-orange-500 rounded-full w-0 transition-all duration-100 ease-linear"></div>
+                        {# Point sur la barre (visible au survol) #}
+                        <div id="progress-handle" class="absolute top-1/2 -translate-y-1/2 -ml-1.5 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover/bar:opacity-100 transition left-0 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                {# Visualizer animé (décoratif) #}
+                <div class="hidden sm:flex gap-1 h-8 items-end opacity-50">
+                    <div class="w-1 bg-red-500 h-3 animate-[bounce_1s_infinite]"></div>
+                    <div class="w-1 bg-orange-500 h-6 animate-[bounce_1.2s_infinite]"></div>
+                    <div class="w-1 bg-red-500 h-4 animate-[bounce_0.8s_infinite]"></div>
+                    <div class="w-1 bg-orange-500 h-7 animate-[bounce_1.5s_infinite]"></div>
                 </div>
             </div>
-            {# Le lecteur audio HTML5 standard #}
-            <audio controls autoplay controlsList="nodownload" class="h-10 w-64 rounded-full bg-slate-200">
-                {# asset() cherche dans le dossier public/ #}
-                <source src="{{ asset('musique/' ~ article.music) }}" type="audio/mpeg">
-                Votre navigateur ne supporte pas l'élément audio.
-            </audio>
+
+            {# L'élément Audio caché qui fait le vrai travail #}
+            <audio id="audio-player" autoplay loop src="{{ asset('musique/' ~ article.music) }}"></audio>
         </div>
+
+        {# SCRIPT DU LECTEUR #}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const audio = document.getElementById('audio-player');
+                const btn = document.getElementById('player-btn');
+                const iconPlay = document.getElementById('icon-play');
+                const iconPause = document.getElementById('icon-pause');
+                const progressBar = document.getElementById('progress-bar');
+                const progressContainer = document.getElementById('progress-container');
+                const progressHandle = document.getElementById('progress-handle');
+                const timeDisplay = document.getElementById('current-time');
+                const durationDisplay = document.getElementById('duration');
+
+                // 1. Gestion Play/Pause
+                function togglePlay() {
+                    if (audio.paused) {
+                        audio.play();
+                        iconPlay.classList.add('hidden');
+                        iconPause.classList.remove('hidden');
+                    } else {
+                        audio.pause();
+                        iconPlay.classList.remove('hidden');
+                        iconPause.classList.add('hidden');
+                    }
+                }
+
+                btn.addEventListener('click', togglePlay);
+
+                // Si l'autoplay est bloqué par le navigateur, on met l'icone Play
+                audio.addEventListener('play', () => {
+                    iconPlay.classList.add('hidden');
+                    iconPause.classList.remove('hidden');
+                });
+                
+                audio.addEventListener('pause', () => {
+                    iconPlay.classList.remove('hidden');
+                    iconPause.classList.add('hidden');
+                });
+
+                // 2. Mise à jour du temps et de la barre
+                audio.addEventListener('timeupdate', () => {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = percent + '%';
+                    progressHandle.style.left = percent + '%';
+                    
+                    // Formatage du temps 0:00
+                    const mins = Math.floor(audio.currentTime / 60);
+                    const secs = Math.floor(audio.currentTime % 60);
+                    timeDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                });
+
+                // 3. Affichage de la durée totale au chargement
+                audio.addEventListener('loadedmetadata', () => {
+                    const mins = Math.floor(audio.duration / 60);
+                    const secs = Math.floor(audio.duration % 60);
+                    durationDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                });
+
+                // 4. Click sur la barre pour avancer (Seek)
+                progressContainer.addEventListener('click', (e) => {
+                    const width = progressContainer.clientWidth;
+                    const clickX = e.offsetX;
+                    const duration = audio.duration;
+                    audio.currentTime = (clickX / width) * duration;
+                });
+            });
+        </script>
     {% endif %}
-    {# 👆 FIN LECTEUR AUDIO 👆 #}
+    {# 👆 FIN LECTEUR CUSTOM 👆 #}
 
     {# --- 1. EN-TÊTE ARTICLE + NOTATION --- #}
     <div class="bg-slate-800 p-8 rounded-t-lg border border-slate-700 border-b-0 relative">
+        {# ... (Le reste du code reste exactement le même qu'avant) ... #}
         <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 mb-4 break-words">
             {{ article.title }}
         </h1>
@@ -49,7 +153,6 @@
                 <span>le {{ article.createdAt|date('d/m/Y à H:i') }}</span>
             </div>
 
-            {# ⭐ SYSTÈME DE NOTATION ⭐ #}
             <div class="bg-slate-900 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-3">
                 <div class="text-yellow-400 font-bold text-lg">
                     {% set avg = article.averageRating %}
@@ -77,28 +180,21 @@
 
     {# --- 2. CONTENU DE L'ARTICLE (Blocs) --- #}
     <div class="bg-slate-900 border border-slate-700 p-8 rounded-b-lg min-h-[300px] mb-12">
-        
-        {# Résumé (Intro) #}
         <div class="text-xl text-slate-400 italic mb-8 border-l-4 border-red-500 pl-4 break-words">
             {{ article.summary|nl2br }}
         </div>
         
         <hr class="border-slate-800 mb-8">
         
-        {# Blocs Dynamiques #}
         <div class="space-y-6">
             {% for bloc in article.blocs %}
-                
-                {# TITRE H2 #}
                 {% if bloc.type == 'title_h2' %}
                     <h2 class="text-2xl font-bold text-red-400 mt-8 mb-4 break-words">{{ bloc.content }}</h2>
                 
-                {# TEXTE #}
                 {% elseif bloc.type == 'text' %}
                     {% if bloc.title %}<h3 class="text-lg font-semibold text-slate-500 mt-4">{{ bloc.title }}</h3>{% endif %}
                     <p class="text-slate-300 leading-relaxed text-lg text-justify break-words">{{ bloc.content|nl2br }}</p>
                 
-                {# IMAGE #}
                 {% elseif bloc.type == 'image' %}
                     <figure class="my-6 bg-slate-800 p-2 rounded-lg border border-slate-700">
                         <img src="{{ bloc.content }}" alt="{{ bloc.title }}" class="rounded shadow-lg w-full object-cover max-h-[500px]">
@@ -107,7 +203,6 @@
                         {% endif %}
                     </figure>
                 
-                {# VISUALISATION (GRAPHIQUE) #}
                 {% elseif bloc.type == 'viz' %}
                     {% set parts = bloc.content|split('::') %}
                     {% set vizType = parts[0] %}
@@ -140,7 +235,6 @@
                                     const data = results.data;
                                     let labels = [];
                                     let values = [];
-                                    
                                     data.forEach(row => {
                                         if(row.length >= 2) {
                                             let valStr = row[1].toString().replace(',', '.').trim();
@@ -150,7 +244,6 @@
                                             }
                                         }
                                     });
-
                                     const ctx = document.getElementById(chartId).getContext('2d');
                                     new Chart(ctx, {
                                         type: chartType,
@@ -202,7 +295,6 @@
             </div>
         {% endif %}
 
-        {# MACRO RECURSIVE COMMENTAIRES #}
         {% macro display_comment(comment, article_id, level = 0) %}
             <div class="flex gap-3 mb-4 {% if level > 0 %}ml-8 border-l-2 border-slate-700 pl-4{% endif %}" id="comment-{{ comment.id }}">
                 <div class="flex flex-col items-center gap-1 pt-1 min-w-[30px]">
