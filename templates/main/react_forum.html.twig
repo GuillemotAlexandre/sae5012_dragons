@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forum React - DragonCMS{% endblock %}
+
+{% block body %}
+    
+    <div id="react-root"></div>
+{% endblock %}
+
+{# On charge le JavaScript compilé par Webpack Encore #}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
