@@ -2,60 +2,75 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Dragon Data CMS{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🐉</text></svg>">
+        <title>Dragon Data CMS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        {# Import CDN Tailwind CSS #}
+        {{ encore_entry_link_tags('app') }}
+        
+        <style>
+            @font-face {
+                font-family: 'Arcadian';
+                src: url('/fonts/arcadian_ruins_regular.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+        </style>
+
         <script src="https://cdn.tailwindcss.com"></script>
-        
-        {% block stylesheets %}
-        {% endblock %}
 
-        {% block javascripts %}
-        {% endblock %}
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            dragon: ['Arcadian', 'serif'],
+                            sans: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+                        },
+                        colors: {
+                            viking: {
+                                dark: '#1c1917',
+                                rock: '#292524',
+                                light: '#a8a29e',
+                                red: '#7f1d1d',
+                                fire: '#dc2626',
+                                gold: '#d97706',
+                                parchment: '#e7e5e4'
+                            }
+                        },
+                        backgroundImage: {
+                            'stone-pattern': "url('/images/fond_pierre.png')",
+                        }
+                    }
+                }
+            }
+        </script>
     </head>
-    <body class="bg-slate-900 text-slate-200 font-sans antialiased">
+    
+    <body class="bg-viking-dark bg-stone-pattern bg-repeat text-viking-parchment font-sans min-h-screen">
         
-        {# Navigation Temporaire #}
-        <nav class="bg-slate-800 border-b border-slate-700 p-4 shadow-md sticky top-0 z-50">
-            <div class="container mx-auto flex justify-between items-center">
-                
-                <div class="flex items-center gap-2">
-                    <span class="text-3xl">🐉</span>
-                    <a href="{{ path('app_home') }}" class="text-2xl font-bold text-red-500 hover:text-red-400 transition">DragonCMS</a>
-                </div>
-
-                <ul class="hidden md:flex space-x-8 text-slate-300 font-medium">
-                    <li><a href="{{ path('app_home') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Accueil</a></li>
-                    <li><a href="{{ path('app_stats') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Statistiques</a></li>
-                    <li><a href="{{ path('app_forum') }}" class="hover:text-white hover:border-b-2 border-red-500 pb-1 transition-all">Forum</a></li>
-                </ul>
-
-               <div>
-                    {% if app.user %}
-                        {# SI CONNECTÉ #}
-                        <div class="flex items-center gap-4">
-                            <span class="text-slate-300">
-                                Salut, <span class="font-bold text-red-400">{{ app.user.pseudo }}</span>
-                            </span>
-                            <a href="{{ path('app_logout') }}" class="text-sm text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 px-3 py-1 rounded transition">
-                                Déconnexion
-                            </a>
-                        </div>
-                    {% else %}
-                        {# SI DÉCONNECTÉ #}
-                        <a href="{{ path('app_login') }}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 transition text-sm">
-                            Connexion
-                        </a>
-                    {% endif %}
+        <div id="react-root">
+            <div class="flex items-center justify-center h-screen">
+                <div class="text-center">
+                    <h1 class="text-4xl font-dragon text-viking-gold mb-4">Chargement de l'Antre...</h1>
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-viking-fire mx-auto"></div>
                 </div>
             </div>
-        </nav>
-
-        {# Contenu des pages #}
-        <div class="container mx-auto py-10 px-4">
-            {% block body %}{% endblock %}
         </div>
-        
+
+        <!-- 👇 TEST DE DIAGNOSTIC 👇 -->
+        <script>
+            console.log("✅ 1. Le HTML est chargé.");
+            // On vérifie si les scripts Webpack sont détectés
+            window.addEventListener('load', () => {
+                const scripts = document.querySelectorAll('script[src*="/build/"]');
+                if (scripts.length > 0) {
+                    console.log("✅ 2. Le script Webpack est présent dans le HTML :", scripts[0].src);
+                } else {
+                    console.error("❌ 2. ERREUR : Aucun script Webpack (/build/...) trouvé dans le HTML !");
+                }
+            });
+        </script>
+
+        {{ encore_entry_script_tags('app') }}
     </body>
 </html>

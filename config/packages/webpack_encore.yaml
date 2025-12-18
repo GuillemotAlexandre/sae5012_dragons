@@ -1,0 +1,10 @@
+webpack_encore:
+    # Le chemin sur le disque où les fichiers sont stockés
+    output_path: '%kernel.project_dir%/public/build'
+    
+    # Si vous avez plusieurs builds, configurez-les ici (pas nécessaire pour l'instant)
+    # builds:
+    #     app: '%kernel.project_dir%/public/build/app'
+
+    # Cache les fichiers entrypoints.json en production pour la perf
+    cache: false
