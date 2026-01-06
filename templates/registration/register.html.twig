@@ -16,7 +16,6 @@
             <p class="text-slate-400 mt-2">Prêtez serment et accédez aux archives secrètes.</p>
         </div>
 
-        {# Formulaire visuel (non fonctionnel pour l'instant) #}
         <form method="post" class="relative z-10">
             
             {# Champ Pseudo #}
@@ -35,6 +34,22 @@
                        placeholder="vous@exemple.com" required>
             </div>
 
+            {# Champ Sélection du Rôle #}
+            <div class="mb-5">
+                <label for="role" class="block text-sm font-medium text-slate-300 mb-2">Rang au sein de la Guilde</label>
+                <select name="role" id="role" 
+                        class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition" 
+                        required>
+                    <option value="ROLE_USER" selected>Abonné (Lecteur & Noteur)</option>
+                    <option value="ROLE_AUTEUR">Auteur (Narrateur)</option>
+                    <option value="ROLE_EDITEUR">Éditeur (Gardien des écrits)</option>
+                    <option value="ROLE_DESIGNER">Designeur (Maître artisan)</option>
+                    <option value="ROLE_FOURNISSEUR">Fournisseur de données (Scribe de données)</option>
+                    <option value="ROLE_ADMIN">Administrateur (Grand Maître)</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-1">Choisissez votre destinée.</p>
+            </div>
+
             {# Champ Mot de passe #}
             <div class="mb-5">
                 <label for="plainPassword" class="block text-sm font-medium text-slate-300 mb-2">Mot de passe</label>
@@ -44,7 +59,7 @@
                 <p class="text-xs text-slate-500 mt-1">Au moins 6 caractères.</p>
             </div>
 
-            {# Checkbox CGU (Condition du brief sur les données) #}
+            {# Checkbox CGU #}
             <div class="flex items-start mb-6">
                 <div class="flex items-center h-5">
                     <input id="agreeTerms" name="agreeTerms" type="checkbox" 

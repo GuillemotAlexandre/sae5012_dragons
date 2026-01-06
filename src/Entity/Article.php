@@ -5,17 +5,33 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\ArticleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\State\ArticleProcessor;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 #[ApiResource(
     operations: [
         new Get(),
-        new GetCollection()
+        new GetCollection(),
+        // On ajoute le processor ici pour la création
+        new Post(
+            security: "is_granted('ROLE_AUTEUR')",
+            processor: ArticleProcessor::class 
+        ),
+        new Patch(
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+        ),
+        new Delete(
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+        ),
     ],
     normalizationContext: ['groups' => ['article:read']],
     denormalizationContext: ['groups' => ['article:write']],
@@ -36,7 +52,6 @@ class Article
     #[Groups(['article:read', 'article:write'])]
     private ?string $summary = null;
 
-    // 👇 NOUVEAU CHAMP MUSIQUE 👇
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     #[Groups(['article:read', 'article:write'])]
     private ?string $music = null;
@@ -47,14 +62,14 @@ class Article
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Groups(['article:read'])]
+    #[Groups(['article:read'])] // L'auteur est défini automatiquement ou via le write
     private ?User $author = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['article:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['article:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
@@ -78,55 +93,67 @@ class Article
     {
         return $this->id;
     }
+
     public function getTitle(): ?string
     {
         return $this->title;
     }
+
     public function setTitle(string $title): self
     {
         $this->title = $title;
         return $this;
     }
+
     public function getSummary(): ?string
     {
         return $this->summary;
     }
+
     public function setSummary(?string $summary): self
     {
         $this->summary = $summary;
         return $this;
     }
+
     public function getAuthor(): ?User
     {
         return $this->author;
     }
+
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
         return $this;
     }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
+
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
         return $this;
     }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
+
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
+
     public function getBlocs(): Collection
     {
         return $this->blocs;
     }
+
     public function addBloc(Bloc $bloc): self
     {
         if (!$this->blocs->contains($bloc)) {
@@ -135,18 +162,22 @@ class Article
         }
         return $this;
     }
+
     public function removeBloc(Bloc $bloc): self
     {
         if ($this->blocs->removeElement($bloc)) {
             if ($bloc->getArticle() === $this) {
+                $bloc->setArticle(null);
             }
         }
         return $this;
     }
+
     public function getComments(): Collection
     {
         return $this->comments;
     }
+
     public function addComment(Comment $comment): static
     {
         if (!$this->comments->contains($comment)) {
@@ -155,16 +186,18 @@ class Article
         }
         return $this;
     }
+
     public function removeComment(Comment $comment): static
     {
-        if ($this->comments->removeElement($comment)) {
-        }
+        $this->comments->removeElement($comment);
         return $this;
     }
+
     public function getRatings(): Collection
     {
         return $this->ratings;
     }
+
     public function addRating(Rating $rating): static
     {
         if (!$this->ratings->contains($rating)) {
@@ -173,10 +206,10 @@ class Article
         }
         return $this;
     }
+
     public function removeRating(Rating $rating): static
     {
-        if ($this->ratings->removeElement($rating)) {
-        }
+        $this->ratings->removeElement($rating);
         return $this;
     }
 
@@ -184,11 +217,12 @@ class Article
     {
         if ($this->ratings->isEmpty()) return null;
         $total = 0;
-        foreach ($this->ratings as $rating) $total += $rating->getValue();
+        foreach ($this->ratings as $rating) {
+            $total += $rating->getValue();
+        }
         return round($total / $this->ratings->count(), 1);
     }
 
-    // 👇 GETTER ET SETTER MUSIQUE 👇
     public function getMusic(): ?string
     {
         return $this->music;
