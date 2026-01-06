@@ -13,18 +13,18 @@ const ForumPage = () => {
                 return res.json();
             })
             .then(data => {
-                const items = data['hydra:member'] || [];
-                setArticles(items);
+                setArticles(data['hydra:member'] || []);
                 setLoading(false);
             })
             .catch(err => {
-                setError("Les archives sont inaccessibles.");
+                console.error("Erreur API:", err);
+                setError("Impossible d'accéder aux archives.");
                 setLoading(false);
             });
     }, []);
 
-    if (loading) return <div className="text-center text-viking-gold font-dragon text-2xl py-20 animate-pulse">Consultation des archives...</div>;
-    if (error) return <div className="text-center text-viking-fire font-bold py-10">{error}</div>;
+    if (loading) return <div className="text-center text-viking-gold font-dragon text-3xl py-20 animate-pulse">Déroulement des parchemins...</div>;
+    if (error) return <div className="text-center text-viking-fire font-bold py-10 text-xl border border-viking-red bg-viking-red/10 rounded">{error}</div>;
 
     return (
         <div>
@@ -32,29 +32,29 @@ const ForumPage = () => {
                 <h1 className="text-4xl font-dragon text-viking-parchment">
                     Chroniques des Chasseurs
                 </h1>
-                <span className="bg-viking-red px-3 py-1 rounded text-white font-bold text-sm border border-viking-gold">
+                <span className="bg-viking-red px-3 py-1 rounded text-white font-bold text-sm border border-viking-gold shadow-md">
                     {articles.length} Récits
                 </span>
             </div>
             
             {articles.length === 0 ? (
-                <p className="text-viking-light text-center italic">Les parchemins sont vierges...</p>
+                <div className="text-center py-10 bg-viking-rock/50 rounded-lg border border-dashed border-viking-light">
+                    <p className="text-viking-light italic text-lg">Les archives sont vides pour le moment.</p>
+                </div>
             ) : (
                 <div className="grid gap-6">
                     {articles.map(article => (
                         <div key={article.id} className="group bg-viking-rock p-6 rounded-sm border border-stone-600 border-l-4 border-l-viking-gold hover:border-l-viking-fire hover:bg-stone-800 transition duration-300 shadow-lg relative overflow-hidden">
                             
-                            {/* Titre */}
                             <h2 className="text-2xl font-dragon text-viking-gold mb-2 group-hover:text-white transition">
                                 {article.title}
                             </h2>
                             
-                            {/* Résumé */}
                             <p className="text-viking-light mb-6 line-clamp-2 font-serif leading-relaxed">
                                 {article.summary}
                             </p>
                             
-                            <div className="flex justify-between items-end mt-4">
+                            <div className="flex justify-between items-end mt-4 pt-4 border-t border-stone-700">
                                 <span className="text-xs text-stone-500 uppercase tracking-widest font-bold">
                                     {new Date(article.createdAt).toLocaleDateString()}
                                 </span>

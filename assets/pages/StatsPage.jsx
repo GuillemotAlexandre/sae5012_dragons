@@ -29,21 +29,19 @@ const StatsPage = () => {
   };
 
   useEffect(() => {
-    // 1. Box Office
     loadCSV('/data/stats/box_office.csv', (data) => {
       setBoxOfficeData({
         labels: data.map(i => i['Film']),
         datasets: [{
           label: 'M$',
           data: data.map(i => parseFloat(i['Box Office (Millions $)'])),
-          backgroundColor: ['#7f1d1d', '#dc2626', '#d97706'], // Couleurs Viking
+          backgroundColor: ['#7f1d1d', '#dc2626', '#d97706'],
           borderColor: '#292524',
           borderWidth: 2
         }]
       });
     });
 
-    // 2. Population
     loadCSV('/data/stats/berk_population.csv', (data) => {
       setPopulationData({
         labels: data.map(i => i['Groupe']),
@@ -56,14 +54,13 @@ const StatsPage = () => {
       });
     });
 
-    // 3. Timeline
     loadCSV('/data/stats/dragons_timeline.csv', (data) => {
         setTimelineData({
           labels: data.map(i => i['Année']),
           datasets: [{
             label: 'Espèces',
             data: data.map(i => parseFloat(i['Espèces Recensées'])),
-            borderColor: '#d97706', // Or
+            borderColor: '#d97706',
             backgroundColor: 'rgba(217, 119, 6, 0.2)',
             pointBackgroundColor: '#fff',
             tension: 0.3,
@@ -83,7 +80,7 @@ const StatsPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto animate-fade-in">
         <div className="text-center mb-12">
             <h1 className="text-5xl font-dragon text-viking-gold mb-4 drop-shadow-md">
                 L'Observatoire de Berk
@@ -94,7 +91,6 @@ const StatsPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Box Office */}
             <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
                 <h3 className="text-2xl font-dragon text-white mb-6">Trésor de Guerre</h3>
@@ -103,7 +99,6 @@ const StatsPage = () => {
                 </div>
             </div>
 
-            {/* Population */}
             <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
                 <h3 className="text-2xl font-dragon text-white mb-6">Clans & Tribus</h3>
@@ -112,7 +107,6 @@ const StatsPage = () => {
                 </div>
             </div>
 
-            {/* Timeline */}
             <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl md:col-span-2 relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
                 <h3 className="text-2xl font-dragon text-white mb-6">Chronologie des Découvertes</h3>

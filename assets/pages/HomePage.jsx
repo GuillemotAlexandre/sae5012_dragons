@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 
 const HomePage = () => {
     return (
-        <div className="text-center py-16">
+        <div className="text-center py-16 animate-fade-in-up">
             <h1 className="text-6xl md:text-8xl font-dragon text-transparent bg-clip-text bg-gradient-to-r from-viking-gold via-yellow-500 to-viking-gold mb-8 drop-shadow-sm">
                 Bienvenue dans l'Antre
             </h1>
             
-            <div className="w-24 h-1 bg-viking-red mx-auto mb-8 rounded-full"></div>
+            <div className="w-24 h-1 bg-viking-red mx-auto mb-8 rounded-full shadow-[0_0_10px_#dc2626]"></div>
 
             <p className="text-2xl text-viking-light mb-12 max-w-3xl mx-auto font-serif italic leading-relaxed">
                 "Là où les cartes s'arrêtent, l'aventure commence. Explorez les légendes, partagez vos découvertes et analysez les données de l'archipel de Berk."

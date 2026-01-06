@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     return (
-        <nav className="bg-viking-rock border-b-2 border-viking-gold/50 p-4 sticky top-0 z-50 shadow-lg backdrop-blur-sm bg-opacity-95">
+        <nav className="bg-viking-rock border-b-2 border-viking-gold/50 p-4 sticky top-0 z-50 shadow-lg backdrop-blur-md bg-opacity-95">
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 
-                <Link to="/" className="text-3xl font-dragon text-viking-gold hover:text-white transition flex items-center gap-2 drop-shadow-md">
-                    <span className="text-4xl">🐉</span> DragonCMS
+                <Link to="/" className="text-3xl font-dragon text-viking-gold hover:text-white transition flex items-center gap-2 drop-shadow-md group">
+                    <span className="text-4xl group-hover:scale-110 transition-transform">Riders of Burk</span> 
                 </Link>
 
                 <ul className="flex space-x-8 text-lg font-dragon tracking-wide text-viking-light">
