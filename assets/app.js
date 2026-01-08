@@ -12,6 +12,7 @@ import ArticlePage from './pages/ArticlePage';
 import StatsPage from './pages/StatsPage';
 import Navbar from './components/Navbar';
 import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage';
 
 console.log("🐲 Démarrage de l'application DragonCMS...");
 
@@ -38,6 +39,7 @@ const App = () => {
                         <Route path="/forum/article/:id" element={<ArticlePage />} />
                         <Route path="/statistique" element={<StatsPage />} />
                         <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/login" element={<LoginPage />} />
                     </Routes>
                 </div>
 
