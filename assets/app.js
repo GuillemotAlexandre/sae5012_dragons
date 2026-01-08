@@ -1,24 +1,19 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-// Import des styles
 import './styles/app.css';
-
-// Import des pages
 import HomePage from './pages/HomePage';
 import ForumPage from './pages/ForumPage';
 import ArticlePage from './pages/ArticlePage';
 import StatsPage from './pages/StatsPage';
 import Navbar from './components/Navbar';
 
-console.log("🐲 Démarrage de l'application DragonCMS...");
+console.log("Démarrage de l'application DragonCMS...");
 
 const App = () => {
     return (
         <BrowserRouter>
             <div className="min-h-screen flex flex-col font-sans text-viking-parchment">
-                {/* BANNIÈRE */}
                 <div className="w-full h-32 md:h-48 overflow-hidden border-b-4 border-viking-gold relative shadow-2xl bg-black">
                     <img 
                         src="/images/banniere.png" 

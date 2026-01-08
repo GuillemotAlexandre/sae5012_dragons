@@ -4,16 +4,16 @@ const DragonForum = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Fonction pour récupérer les données de l'API Symfony
+   
     useEffect(() => {
         fetch('/api/articles', {
             headers: {
-                'Accept': 'application/ld+json' // On demande du JSON-LD (format API Platform)
+                'Accept': 'application/ld+json' 
             }
         })
         .then(response => response.json())
         .then(data => {
-            // API Platform renvoie les données dans 'hydra:member'
+           
             setArticles(data['hydra:member']); 
             setLoading(false);
         })
@@ -47,7 +47,7 @@ const DragonForum = () => {
                         </p>
                         
                         <div className="text-right">
-                            {/* Lien vers la page détail (qui est encore en Twig pour l'instant) */}
+                            
                             <a href={`/forum/article/${article.id}`} className="text-sm text-red-400 hover:text-red-300 font-semibold">
                                 Lire la suite →
                             </a>

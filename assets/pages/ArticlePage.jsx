@@ -26,7 +26,7 @@ const ArticlePage = () => {
             </Link>
             
             <div className="bg-viking-rock p-8 rounded-lg border-2 border-stone-600 shadow-2xl relative overflow-hidden">
-                {/* Décoration coin */}
+                
                 <div className="absolute top-0 right-0 w-20 h-20 bg-viking-gold opacity-10 rounded-bl-full"></div>
 
                 <h1 className="text-4xl md:text-5xl font-dragon text-viking-gold mb-4 leading-tight">
@@ -44,7 +44,7 @@ const ArticlePage = () => {
                     {article.summary}
                 </div>
                 
-                {/* Note: Les blocs et commentaires nécessitent une logique plus poussée à implémenter plus tard */}
+                
             </div>
         </div>
     );
