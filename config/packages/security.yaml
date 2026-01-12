@@ -10,7 +10,7 @@ security:
                 class: App\Entity\User
                 property: email # On utilise l'email comme identifiant unique
 
-    # 3. Hiérarchie des rôles (Tes réglages conservés)
+    # 3. Hiérarchie des rôles (Tes réglages optimisés)
     role_hierarchy:
         ROLE_ABONNE:      ROLE_USER
         ROLE_AUTEUR:      ROLE_ABONNE
@@ -25,7 +25,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # PARE-FEU DE CONNEXION : Intercepte le POST JSON de React
+        # PARE-FEU DE CONNEXION : Intercepte le POST JSON de React pour le Token
         login:
             pattern: ^/api/login_check
             stateless: true
@@ -33,7 +33,7 @@ security:
                 check_path: /api/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
-                username_path: email # Dit à Symfony de lire la clé "email" dans ton JSON React
+                username_path: email
 
         # PROTECTION DES ROUTES API : Vérifie la présence du Token JWT
         api:
@@ -41,7 +41,7 @@ security:
             stateless: true
             jwt: ~
 
-        # PARE-FEU PRINCIPAL (Session classique pour Twig/Admin)
+        # PARE-FEU PRINCIPAL (Session classique pour Twig/Admin/Logout)
         main:
             lazy: true
             provider: app_user_provider
@@ -56,14 +56,22 @@ security:
 
     # 5. Contrôle d'accès (Access Control)
     access_control:
-        # Routes publiques (Accessibles sans être connecté)
+        # --- ROUTES PUBLIQUES ---
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        # Lecture du forum accessible à tous
         - { path: ^/api/articles, roles: PUBLIC_ACCESS, methods: [GET] }
+
+        # --- ROUTES DASHBOARD (NOUVEAU) ---
+        # On sécurise l'API de statistiques pour les Éditeurs et Admins
+        - { path: ^/api/admin, roles: ROLE_EDITEUR }
+
+        # --- ROUTES PRIVÉES ---
+        # Création/Modif/Suppression réservée aux Auteurs, Éditeurs et Admins
+        - { path: ^/api/articles, roles: ROLE_AUTEUR, methods: [POST, PUT, PATCH, DELETE] }
         
-        # Routes protégées par rôle
-        - { path: ^/api/articles, roles: ROLE_AUTEUR, methods: [POST, PUT, DELETE] }
+        # Accès à l'interface d'administration Twig (si existante)
         - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:

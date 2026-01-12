@@ -11,8 +11,11 @@ import ForumPage from './pages/ForumPage';
 import ArticlePage from './pages/ArticlePage';
 import StatsPage from './pages/StatsPage';
 import Navbar from './components/Navbar';
-import RegisterPage from './pages/RegisterPage'
+import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+
+// NOUVEAU : Import de la page Dashboard Admin
+import AdminDashboard from './pages/AdminDashboard';
 
 console.log("🐲 Démarrage de l'application DragonCMS...");
 
@@ -40,6 +43,9 @@ const App = () => {
                         <Route path="/statistique" element={<StatsPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/login" element={<LoginPage />} />
+                        
+                        {/* NOUVELLE ROUTE : Salle du Conseil (Admin) */}
+                        <Route path="/admin" element={<AdminDashboard />} />
                     </Routes>
                 </div>
 
