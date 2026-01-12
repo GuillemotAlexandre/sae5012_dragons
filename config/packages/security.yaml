@@ -1,17 +1,16 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # 1. Gestion du hachage des mots de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    # 2. Définition du fournisseur d'utilisateurs (User Provider)
     providers:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: email # On utilise l'email comme identifiant unique
 
-    # HIÉRARCHIE DES RÔLES
-    # Définit l'ordre de puissance des utilisateurs
+    # 3. Hiérarchie des rôles (Tes réglages conservés)
     role_hierarchy:
         ROLE_ABONNE:      ROLE_USER
         ROLE_AUTEUR:      ROLE_ABONNE
@@ -20,42 +19,52 @@ security:
         ROLE_FOURNISSEUR: ROLE_USER
         ROLE_ADMIN:       [ROLE_EDITEUR, ROLE_DESIGNER, ROLE_FOURNISSEUR]
 
+    # 4. Configuration des pare-feux (Firewalls)
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        # PARE-FEU DE CONNEXION : Intercepte le POST JSON de React
+        login:
+            pattern: ^/api/login_check
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+                username_path: email # Dit à Symfony de lire la clé "email" dans ton JSON React
+
+        # PROTECTION DES ROUTES API : Vérifie la présence du Token JWT
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
+        # PARE-FEU PRINCIPAL (Session classique pour Twig/Admin)
         main:
             lazy: true
             provider: app_user_provider
-
-            # Configuration du Login
             form_login:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-                username_parameter: email
-                password_parameter: password
                 default_target_path: app_home
-            
-            # Configuration du Logout
             logout:
                 path: app_logout
                 target: app_login
 
-    # CONTRÔLE D'ACCÈS
-    # Note : Symfony s'arrête à la PREMIÈRE règle qui correspond au chemin
+    # 5. Contrôle d'accès (Access Control)
     access_control:
-        # Pages publiques
+        # Routes publiques (Accessibles sans être connecté)
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-
-        # Pages réservées à des rôles spécifiques (exemples basés sur tes besoins)
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/import-data, roles: ROLE_FOURNISSEUR }
-        - { path: ^/design-theme, roles: ROLE_DESIGNER }
+        - { path: ^/api/articles, roles: PUBLIC_ACCESS, methods: [GET] }
         
-        # Par défaut, le reste du site est accessible aux utilisateurs connectés (ROLE_USER)
-        # - { path: ^/, roles: ROLE_USER }
+        # Routes protégées par rôle
+        - { path: ^/api/articles, roles: ROLE_AUTEUR, methods: [POST, PUT, DELETE] }
+        - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:
     security:
