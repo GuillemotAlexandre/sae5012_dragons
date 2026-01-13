@@ -3,7 +3,7 @@
     "app": {
       "js": [
         "/build/runtime.js",
-        "/build/vendors-node_modules_react-dom_client_js-node_modules_react-router-dom_dist_index_js-node_mod-e7bd5c.js",
+        "/build/vendors-node_modules_papaparse_papaparse_min_js-node_modules_react-dom_client_js-node_modules-e7d27a.js",
         "/build/app.js"
       ],
       "css": [
