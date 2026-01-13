@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+<<<<<<< HEAD
     "@babel/core": "^7.28.6",
     "@babel/preset-env": "^7.28.6",
     "@babel/preset-react": "^7.23.3",
@@ -37,5 +38,21 @@
     "react-router-dom": "^6.21.1",
     "regenerator-runtime": "^0.14.1",
     "three": "^0.160.0"
+=======
+    "@babel/preset-react": "^7.23.3",
+    "@symfony/webpack-encore": "^4.5.0",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "webpack-notifier": "^1.15.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "core-js": "^3.47.0",
+    "papaparse": "^5.4.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-router-dom": "^6.21.1",
+    "regenerator-runtime": "^0.14.1"
+>>>>>>> a6741540712ca4eb98b2c2a8b031a0494a0defad
   }
 }

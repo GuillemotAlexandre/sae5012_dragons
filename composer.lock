@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "cfec29876aac785293541e41c1a90348",
+=======
+    "content-hash": "401779aec4490e1848ec6c1253bee325",
+>>>>>>> a6741540712ca4eb98b2c2a8b031a0494a0defad
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -2574,6 +2578,7 @@
                 }
             ],
             "time": "2025-10-17T11:30:53+00:00"
+<<<<<<< HEAD
         },
         {
             "name": "lexik/jwt-authentication-bundle",
@@ -2690,6 +2695,8 @@
                 }
             ],
             "time": "2025-12-20T17:47:00+00:00"
+=======
+>>>>>>> a6741540712ca4eb98b2c2a8b031a0494a0defad
         },
         {
             "name": "monolog/monolog",
