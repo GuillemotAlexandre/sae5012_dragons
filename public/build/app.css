@@ -1,9 +1,30 @@
 /*!**************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].oneOf[1].use[1]!./assets/styles/app.css ***!
   \**************************************************************************************************************/
-body {
-    background-color: skyblue;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Ta variable de couleur principale */
+        --viking-orange: #e67e22;
+        
+        /* Ta variable de fond (on garde skyblue par défaut comme tu l'avais) */
+        --viking-bg: #87CEEB; 
+    }
+
+    body {
+        /* On utilise la variable au lieu d'une valeur fixe */
+        background-color: var(--viking-bg);
+        @apply min-h-screen text-white transition-colors duration-300;
+        margin: 0;
+    }
+
+    /* On force l'application de la variable sur tes titres spécifiques */
+    .font-dragon, .navbar-brand, h1 {
+        color: var(--viking-orange) !important;
+    }
 }
 
-
-/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXBwLmNzcyIsIm1hcHBpbmdzIjoiOzs7QUFBQTtJQUNJLHlCQUF5QjtBQUM3QiIsInNvdXJjZXMiOlsid2VicGFjazovL3NhZTUwMTItZHJhZ29ucy8uL2Fzc2V0cy9zdHlsZXMvYXBwLmNzcyJdLCJzb3VyY2VzQ29udGVudCI6WyJib2R5IHtcclxuICAgIGJhY2tncm91bmQtY29sb3I6IHNreWJsdWU7XHJcbn1cclxuIl0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==*/
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXBwLmNzcyIsIm1hcHBpbmdzIjoiOzs7QUFBQSxjQUFjO0FBQ2Qsb0JBQW9CO0FBQ3BCLG1CQUFtQjs7QUFFbkI7SUFDSTtRQUNJLHNDQUFzQztRQUN0Qyx3QkFBd0I7O1FBRXhCLHVFQUF1RTtRQUN2RSxvQkFBb0I7SUFDeEI7O0lBRUE7UUFDSSxxREFBcUQ7UUFDckQsa0NBQWtDO1FBQ2xDLDZEQUE2RDtRQUM3RCxTQUFTO0lBQ2I7O0lBRUEscUVBQXFFO0lBQ3JFO1FBQ0ksc0NBQXNDO0lBQzFDO0FBQ0osQyIsInNvdXJjZXMiOlsid2VicGFjazovL3NhZTUwMTItZHJhZ29ucy8uL2Fzc2V0cy9zdHlsZXMvYXBwLmNzcyJdLCJzb3VyY2VzQ29udGVudCI6WyJAdGFpbHdpbmQgYmFzZTtcclxuQHRhaWx3aW5kIGNvbXBvbmVudHM7XHJcbkB0YWlsd2luZCB1dGlsaXRpZXM7XHJcblxyXG5AbGF5ZXIgYmFzZSB7XHJcbiAgICA6cm9vdCB7XHJcbiAgICAgICAgLyogVGEgdmFyaWFibGUgZGUgY291bGV1ciBwcmluY2lwYWxlICovXHJcbiAgICAgICAgLS12aWtpbmctb3JhbmdlOiAjZTY3ZTIyO1xyXG4gICAgICAgIFxyXG4gICAgICAgIC8qIFRhIHZhcmlhYmxlIGRlIGZvbmQgKG9uIGdhcmRlIHNreWJsdWUgcGFyIGTDqWZhdXQgY29tbWUgdHUgbCdhdmFpcykgKi9cclxuICAgICAgICAtLXZpa2luZy1iZzogIzg3Q0VFQjsgXHJcbiAgICB9XHJcblxyXG4gICAgYm9keSB7XHJcbiAgICAgICAgLyogT24gdXRpbGlzZSBsYSB2YXJpYWJsZSBhdSBsaWV1IGQndW5lIHZhbGV1ciBmaXhlICovXHJcbiAgICAgICAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tdmlraW5nLWJnKTtcclxuICAgICAgICBAYXBwbHkgbWluLWgtc2NyZWVuIHRleHQtd2hpdGUgdHJhbnNpdGlvbi1jb2xvcnMgZHVyYXRpb24tMzAwO1xyXG4gICAgICAgIG1hcmdpbjogMDtcclxuICAgIH1cclxuXHJcbiAgICAvKiBPbiBmb3JjZSBsJ2FwcGxpY2F0aW9uIGRlIGxhIHZhcmlhYmxlIHN1ciB0ZXMgdGl0cmVzIHNww6ljaWZpcXVlcyAqL1xyXG4gICAgLmZvbnQtZHJhZ29uLCAubmF2YmFyLWJyYW5kLCBoMSB7XHJcbiAgICAgICAgY29sb3I6IHZhcigtLXZpa2luZy1vcmFuZ2UpICFpbXBvcnRhbnQ7XHJcbiAgICB9XHJcbn0iXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlUm9vdCI6IiJ9*/

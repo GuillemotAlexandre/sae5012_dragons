@@ -1,3 +1,25 @@
-body {
-    background-color: skyblue;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Ta variable de couleur principale */
+        --viking-orange: #e67e22;
+        
+        /* Ta variable de fond (on garde skyblue par défaut comme tu l'avais) */
+        --viking-bg: #87CEEB; 
+    }
+
+    body {
+        /* On utilise la variable au lieu d'une valeur fixe */
+        background-color: var(--viking-bg);
+        @apply min-h-screen text-white transition-colors duration-300;
+        margin: 0;
+    }
+
+    /* On force l'application de la variable sur tes titres spécifiques */
+    .font-dragon, .navbar-brand, h1 {
+        color: var(--viking-orange) !important;
+    }
 }

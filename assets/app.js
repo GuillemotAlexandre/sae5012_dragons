@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Ajout de useEffect
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -20,6 +20,28 @@ import AdminDashboard from './pages/AdminDashboard';
 console.log("🐲 Démarrage de l'application DragonCMS...");
 
 const App = () => {
+    
+    // --- SYSTÈME DE CHARGEMENT DU DESIGN ---
+    useEffect(() => {
+        // On va chercher le fichier JSON généré par ton PHP
+        fetch('/design_config.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Pas de config trouvée");
+                return response.json();
+            })
+            .then(data => {
+                if (data.primaryColor) {
+                    // On applique la couleur sauvegardée à la variable CSS
+                    document.documentElement.style.setProperty('--viking-orange', data.primaryColor);
+                    console.log("🎨 Design chargé depuis la forge :", data.primaryColor);
+                }
+            })
+            .catch(() => {
+                console.log("ℹ️ Utilisation des couleurs par défaut du village.");
+            });
+    }, []); // S'exécute une seule fois au chargement
+    // ---------------------------------------
+
     return (
         <BrowserRouter>
             <div className="min-h-screen flex flex-col font-sans text-viking-parchment">
