@@ -3,7 +3,7 @@
     "app": {
       "js": [
         "/build/runtime.js",
-        "/build/vendors-node_modules_papaparse_papaparse_min_js-node_modules_react-dom_client_js-node_modules-e7d27a.js",
+        "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-3a4d1e.js",
         "/build/app.js"
       ],
       "css": [
