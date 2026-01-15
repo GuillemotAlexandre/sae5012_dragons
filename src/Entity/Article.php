@@ -15,27 +15,37 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\State\ArticleProcessor;
+use ApiPlatform\Metadata\ApiFilter; // 👈 1. Import
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Metadata\Put;
+
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 #[ApiResource(
-    operations: [
-        new Get(),
-        new GetCollection(),
-        // On ajoute le processor ici pour la création
-        new Post(
-            security: "is_granted('ROLE_AUTEUR')",
-            processor: ArticleProcessor::class 
-        ),
-        new Patch(
-            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
-        ),
-        new Delete(
-            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
-        ),
+    normalizationContext: [
+        'groups' => ['article:read'],
+        'enable_max_depth' => true // 👈 Ajoute cette ligne
     ],
-    normalizationContext: ['groups' => ['article:read']],
-    denormalizationContext: ['groups' => ['article:write']],
+    operations: [
+        // 1. Lecture PUBLIQUE (Important pour le visiteur et l'abonné)
+        new Get(
+            security: "is_granted('PUBLIC_ACCESS')" 
+        ),
+        new GetCollection(
+            security: "is_granted('PUBLIC_ACCESS')"
+        ),
+
+        // 2. Écriture RESTREINTE
+        new Post(
+            security: "is_granted('ROLE_AUTEUR')", 
+            processor: ArticleProcessor::class
+        ),
+        new Put(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
+        new Patch(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
+        new Delete(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
+    ]
 )]
+#[ApiFilter(OrderFilter::class, properties: ['createdAt', 'averageRating'])]
 class Article
 {
     #[ORM\Id]
@@ -213,15 +223,36 @@ class Article
         return $this;
     }
 
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    #[Groups(['article:read', 'article:write'])]
+    private ?float $averageRating = null;
+
+    // ... getters et setters ...
     public function getAverageRating(): ?float
     {
-        if ($this->ratings->isEmpty()) return null;
-        $total = 0;
-        foreach ($this->ratings as $rating) {
-            $total += $rating->getValue();
-        }
-        return round($total / $this->ratings->count(), 1);
+        return $this->averageRating;
     }
+
+    public function setAverageRating(?float $averageRating): self
+    {
+        $this->averageRating = $averageRating;
+        return $this;
+    }
+
+
+
+
+
+    // public function getAverageRating(): ?float
+    // {
+    //     if ($this->ratings->isEmpty()) return null;
+    //     $total = 0;
+    //     foreach ($this->ratings as $rating) {
+    //         $total += $rating->getValue();
+    //     }
+    //     return round($total / $this->ratings->count(), 1);
+    // }
 
     public function getMusic(): ?string
     {
