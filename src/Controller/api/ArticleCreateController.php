@@ -21,10 +21,10 @@ class ArticleCreateController extends AbstractController
             return $this->json(['error' => 'Non autorisé'], 401);
         }
 
-        // Récupération des données textuelles
+        // 1. Données de l'article
         $title = $request->request->get('title');
         $summary = $request->request->get('summary');
-        $music = $request->request->get('music'); // Chemin relatif (ex: film1/track.mp3)
+        $music = $request->request->get('music'); 
 
         if (!$title) {
             return $this->json(['error' => 'Le titre est obligatoire'], 400);
@@ -37,42 +37,46 @@ class ArticleCreateController extends AbstractController
         $article->setAuthor($user);
         $article->setCreatedAt(new \DateTime());
 
-        // Gestion des Blocs
-        // Le frontend enverra les blocs sous forme: blocks[0][type], blocks[0][content], blocks[0][file]
-        $blocksData = $request->request->all('blocks');
-        $files = $request->files->all('blocks'); // Récupère les fichiers associés aux blocs
+        // 2. Gestion des Blocs
+        // ⚠️ CORRECTION : On utilise 'blocs' (comme dans le React) et non 'blocks'
+        $blocsData = $request->request->all()['blocs'] ?? []; 
+        $files = $request->files->get('blocs') ?? [];
 
         $uploadDirBlocs = $this->getParameter('kernel.project_dir') . '/public/uploads/blocs';
-        $uploadDirCsv = $this->getParameter('kernel.project_dir') . '/public/uploads/csv';
-
         if (!file_exists($uploadDirBlocs)) mkdir($uploadDirBlocs, 0777, true);
-        if (!file_exists($uploadDirCsv)) mkdir($uploadDirCsv, 0777, true);
 
-        if (is_array($blocksData)) {
-            foreach ($blocksData as $index => $data) {
+        if (is_array($blocsData)) {
+            foreach ($blocsData as $index => $data) {
                 $bloc = new Bloc();
                 $bloc->setType($data['type']);
                 $bloc->setPosition((int)$data['position']);
-                $bloc->setTitle($data['title'] ?? null);
                 
-                // Contenu par défaut (texte)
+                // Contenu texte par défaut
                 $content = $data['content'] ?? '';
 
-                // Gestion des Fichiers (Image ou CSV)
-                // On regarde si un fichier existe pour cet index
-                if (isset($files[$index]['file'])) {
-                    $uploadedFile = $files[$index]['file'];
-                    $ext = $uploadedFile->getClientOriginalExtension() ?: 'bin';
+                // CAS 1 : IMAGE (Upload de fichier)
+                if ($data['type'] === 'image' && isset($files[$index]['imageFile'])) {
+                    $uploadedFile = $files[$index]['imageFile'];
+                    $ext = $uploadedFile->getClientOriginalExtension() ?: 'jpg';
                     $filename = uniqid() . '.' . $ext;
-
-                    if ($data['type'] === 'image') {
+                    
+                    try {
                         $uploadedFile->move($uploadDirBlocs, $filename);
                         $content = '/uploads/blocs/' . $filename;
-                    } elseif ($data['type'] === 'viz') {
-                        $uploadedFile->move($uploadDirCsv, $filename);
-                        // Format spécial: type_graphique::chemin_fichier
-                        $vizType = $data['vizType'] ?? 'bar';
-                        $content = $vizType . '::/uploads/csv/' . $filename;
+                    } catch (\Exception $e) {
+                        return $this->json(['error' => 'Erreur upload image'], 500);
+                    }
+                } 
+                // CAS 2 : STATISTIQUES (Sélection d'un CSV existant)
+                elseif ($data['type'] === 'stats' || $data['type'] === 'viz') {
+                    // Le React nous envoie le type de graphique et le chemin du CSV choisi
+                    $vizType = $data['vizType'] ?? 'bar';
+                    $csvPath = $data['csvPath'] ?? ''; 
+                    
+                    // On formate le contenu : "type_graphique::chemin_fichier"
+                    // Ex: "bar::/data/stats/population.csv"
+                    if ($csvPath) {
+                        $content = $vizType . '::' . $csvPath;
                     }
                 }
 
@@ -81,8 +85,12 @@ class ArticleCreateController extends AbstractController
             }
         }
 
-        $em->persist($article);
-        $em->flush();
+        try {
+            $em->persist($article);
+            $em->flush();
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Erreur base de données: ' . $e->getMessage()], 500);
+        }
 
         return $this->json(['id' => $article->getId(), 'message' => 'Article créé !'], 201);
     }
