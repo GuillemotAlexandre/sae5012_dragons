@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // Ajout de useEffect
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -15,33 +15,33 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ArticleShow from './components/ArticleShow';
 
-// NOUVEAU : Import de la page Dashboard Admin
+// Import de la page Dashboard Admin
 import AdminDashboard from './pages/AdminDashboard';
 
 console.log("🐲 Démarrage de l'application DragonCMS...");
 
 const App = () => {
     
-    // --- SYSTÈME DE CHARGEMENT DU DESIGN ---
+    // --- SYSTÈME DE CHARGEMENT DU DESIGN (VERSION SILENCIEUSE) ---
     useEffect(() => {
-        // On va chercher le fichier JSON généré par ton PHP
         fetch('/design_config.json')
             .then(response => {
-                if (!response.ok) throw new Error("Pas de config trouvée");
+                // Si le fichier n'existe pas, on renvoie null sans faire d'erreur
+                if (!response.ok) return null;
                 return response.json();
             })
             .then(data => {
-                if (data.primaryColor) {
-                    // On applique la couleur sauvegardée à la variable CSS
+                // On n'applique la couleur que si le fichier a été trouvé et contient la donnée
+                if (data && data.primaryColor) {
                     document.documentElement.style.setProperty('--viking-orange', data.primaryColor);
                     console.log("🎨 Design chargé depuis la forge :", data.primaryColor);
                 }
             })
             .catch(() => {
-                console.log("ℹ️ Utilisation des couleurs par défaut du village.");
+                // En cas d'erreur réseau, on ne log plus d'erreur rouge
+                // Le village utilise simplement les couleurs du CSS par défaut
             });
-    }, []); // S'exécute une seule fois au chargement
-    // ---------------------------------------
+    }, []); 
 
     return (
         <BrowserRouter>
@@ -62,13 +62,10 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/forum" element={<ForumPage />} />
-                        {/* <Route path="/forum/article/:id" element={<ArticlePage />} /> */}
                         <Route path="/forum/article/:id" element={<ArticleShow />} />
                         <Route path="/statistique" element={<StatsPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/login" element={<LoginPage />} />
-                        
-                        {/* NOUVELLE ROUTE : Salle du Conseil (Admin) */}
                         <Route path="/admin" element={<AdminDashboard />} />
                     </Routes>
                 </div>

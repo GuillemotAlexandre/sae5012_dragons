@@ -1,45 +1,52 @@
 /*!**************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].oneOf[1].use[1]!./assets/styles/app.css ***!
   \**************************************************************************************************************/
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
     :root {
-        /* Ta variable de couleur principale */
+        /* Variables Globales */
         --viking-orange: #e67e22;
-        
-        /* Ta variable de fond (on garde skyblue par défaut comme tu l'avais) */
         --viking-bg: #87CEEB; 
+        
+        /* Variable spécifique pour les titres d'articles */
+        --article-title-color: #ffffff;
     }
 
     body {
-        /* On utilise la variable au lieu d'une valeur fixe */
         background-color: var(--viking-bg);
         @apply min-h-screen text-white transition-colors duration-300;
         margin: 0;
     }
 
-    /* On force l'application de la variable sur tes titres spécifiques */
-    .font-dragon, .navbar-brand, h1 {
+    /* MODIFICATION ICI : On enlève le !important du h1 global */
+    .font-dragon, .navbar-brand {
         color: var(--viking-orange) !important;
     }
 
-body {
-    background-color: skyblue;
+    /* Le h1 devient flexible : orange par défaut, mais modifiable par React */
+    h1 {
+        color: var(--viking-orange);
+    }
+
+    /* --- Classe pour le titre des articles --- */
+    .article-dynamic-title {
+        /* On utilise !important ici pour être sûr de gagner contre le h1 global */
+        color: var(--article-title-color, #ffffff) !important;
+        transition: color 0.3s ease;
+    }
+
+    /* Animation des barres de son */
+    @keyframes equalizer {
+      0% { height: 10%; }
+      50% { height: 100%; }
+      100% { height: 10%; }
+    }
+    .animate-bar {
+      animation: equalizer 1s infinite ease-in-out;
+    }
 }
 
-
-/* Animation des barres de son */
-@keyframes equalizer {
-  0% { height: 10%; }
-  50% { height: 100%; }
-  100% { height: 10%; }
-}
-.animate-bar {
-  animation: equalizer 1s infinite ease-in-out;
-}}
-
-/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXBwLmNzcyIsIm1hcHBpbmdzIjoiOzs7O0FBQ0EsY0FBYztBQUNkLG9CQUFvQjtBQUNwQixtQkFBbUI7O0FBRW5CO0lBQ0k7UUFDSSxzQ0FBc0M7UUFDdEMsd0JBQXdCOztRQUV4Qix1RUFBdUU7UUFDdkUsb0JBQW9CO0lBQ3hCOztJQUVBO1FBQ0kscURBQXFEO1FBQ3JELGtDQUFrQztRQUNsQyw2REFBNkQ7UUFDN0QsU0FBUztJQUNiOztJQUVBLHFFQUFxRTtJQUNyRTtRQUNJLHNDQUFzQztJQUMxQzs7QUFFSjtJQUNJLHlCQUF5QjtBQUM3Qjs7O0FBR0EsZ0NBQWdDO0FBQ2hDO0VBQ0UsS0FBSyxXQUFXLEVBQUU7RUFDbEIsTUFBTSxZQUFZLEVBQUU7RUFDcEIsT0FBTyxXQUFXLEVBQUU7QUFDdEI7QUFDQTtFQUNFLDRDQUE0QztBQUM5QyxDQUFDLEMiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly9zYWU1MDEyLWRyYWdvbnMvLi9hc3NldHMvc3R5bGVzL2FwcC5jc3MiXSwic291cmNlc0NvbnRlbnQiOlsiXHJcbkB0YWlsd2luZCBiYXNlO1xyXG5AdGFpbHdpbmQgY29tcG9uZW50cztcclxuQHRhaWx3aW5kIHV0aWxpdGllcztcclxuXHJcbkBsYXllciBiYXNlIHtcclxuICAgIDpyb290IHtcclxuICAgICAgICAvKiBUYSB2YXJpYWJsZSBkZSBjb3VsZXVyIHByaW5jaXBhbGUgKi9cclxuICAgICAgICAtLXZpa2luZy1vcmFuZ2U6ICNlNjdlMjI7XHJcbiAgICAgICAgXHJcbiAgICAgICAgLyogVGEgdmFyaWFibGUgZGUgZm9uZCAob24gZ2FyZGUgc2t5Ymx1ZSBwYXIgZMOpZmF1dCBjb21tZSB0dSBsJ2F2YWlzKSAqL1xyXG4gICAgICAgIC0tdmlraW5nLWJnOiAjODdDRUVCOyBcclxuICAgIH1cclxuXHJcbiAgICBib2R5IHtcclxuICAgICAgICAvKiBPbiB1dGlsaXNlIGxhIHZhcmlhYmxlIGF1IGxpZXUgZCd1bmUgdmFsZXVyIGZpeGUgKi9cclxuICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS12aWtpbmctYmcpO1xyXG4gICAgICAgIEBhcHBseSBtaW4taC1zY3JlZW4gdGV4dC13aGl0ZSB0cmFuc2l0aW9uLWNvbG9ycyBkdXJhdGlvbi0zMDA7XHJcbiAgICAgICAgbWFyZ2luOiAwO1xyXG4gICAgfVxyXG5cclxuICAgIC8qIE9uIGZvcmNlIGwnYXBwbGljYXRpb24gZGUgbGEgdmFyaWFibGUgc3VyIHRlcyB0aXRyZXMgc3DDqWNpZmlxdWVzICovXHJcbiAgICAuZm9udC1kcmFnb24sIC5uYXZiYXItYnJhbmQsIGgxIHtcclxuICAgICAgICBjb2xvcjogdmFyKC0tdmlraW5nLW9yYW5nZSkgIWltcG9ydGFudDtcclxuICAgIH1cclxuXHJcbmJvZHkge1xyXG4gICAgYmFja2dyb3VuZC1jb2xvcjogc2t5Ymx1ZTtcclxufVxyXG5cclxuXHJcbi8qIEFuaW1hdGlvbiBkZXMgYmFycmVzIGRlIHNvbiAqL1xyXG5Aa2V5ZnJhbWVzIGVxdWFsaXplciB7XHJcbiAgMCUgeyBoZWlnaHQ6IDEwJTsgfVxyXG4gIDUwJSB7IGhlaWdodDogMTAwJTsgfVxyXG4gIDEwMCUgeyBoZWlnaHQ6IDEwJTsgfVxyXG59XHJcbi5hbmltYXRlLWJhciB7XHJcbiAgYW5pbWF0aW9uOiBlcXVhbGl6ZXIgMXMgaW5maW5pdGUgZWFzZS1pbi1vdXQ7XHJcbn19Il0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==*/
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXBwLmNzcyIsIm1hcHBpbmdzIjoiOzs7QUFBQSxjQUFjO0FBQ2Qsb0JBQW9CO0FBQ3BCLG1CQUFtQjs7QUFFbkI7SUFDSTtRQUNJLHVCQUF1QjtRQUN2Qix3QkFBd0I7UUFDeEIsb0JBQW9COztRQUVwQixtREFBbUQ7UUFDbkQsOEJBQThCO0lBQ2xDOztJQUVBO1FBQ0ksa0NBQWtDO1FBQ2xDLDZEQUE2RDtRQUM3RCxTQUFTO0lBQ2I7O0lBRUEsNERBQTREO0lBQzVEO1FBQ0ksc0NBQXNDO0lBQzFDOztJQUVBLDBFQUEwRTtJQUMxRTtRQUNJLDJCQUEyQjtJQUMvQjs7SUFFQSw4Q0FBOEM7SUFDOUM7UUFDSSwwRUFBMEU7UUFDMUUscURBQXFEO1FBQ3JELDJCQUEyQjtJQUMvQjs7SUFFQSxnQ0FBZ0M7SUFDaEM7TUFDRSxLQUFLLFdBQVcsRUFBRTtNQUNsQixNQUFNLFlBQVksRUFBRTtNQUNwQixPQUFPLFdBQVcsRUFBRTtJQUN0QjtJQUNBO01BQ0UsNENBQTRDO0lBQzlDO0FBQ0osQyIsInNvdXJjZXMiOlsid2VicGFjazovL3NhZTUwMTItZHJhZ29ucy8uL2Fzc2V0cy9zdHlsZXMvYXBwLmNzcyJdLCJzb3VyY2VzQ29udGVudCI6WyJAdGFpbHdpbmQgYmFzZTtcclxuQHRhaWx3aW5kIGNvbXBvbmVudHM7XHJcbkB0YWlsd2luZCB1dGlsaXRpZXM7XHJcblxyXG5AbGF5ZXIgYmFzZSB7XHJcbiAgICA6cm9vdCB7XHJcbiAgICAgICAgLyogVmFyaWFibGVzIEdsb2JhbGVzICovXHJcbiAgICAgICAgLS12aWtpbmctb3JhbmdlOiAjZTY3ZTIyO1xyXG4gICAgICAgIC0tdmlraW5nLWJnOiAjODdDRUVCOyBcclxuICAgICAgICBcclxuICAgICAgICAvKiBWYXJpYWJsZSBzcMOpY2lmaXF1ZSBwb3VyIGxlcyB0aXRyZXMgZCdhcnRpY2xlcyAqL1xyXG4gICAgICAgIC0tYXJ0aWNsZS10aXRsZS1jb2xvcjogI2ZmZmZmZjtcclxuICAgIH1cclxuXHJcbiAgICBib2R5IHtcclxuICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS12aWtpbmctYmcpO1xyXG4gICAgICAgIEBhcHBseSBtaW4taC1zY3JlZW4gdGV4dC13aGl0ZSB0cmFuc2l0aW9uLWNvbG9ycyBkdXJhdGlvbi0zMDA7XHJcbiAgICAgICAgbWFyZ2luOiAwO1xyXG4gICAgfVxyXG5cclxuICAgIC8qIE1PRElGSUNBVElPTiBJQ0kgOiBPbiBlbmzDqHZlIGxlICFpbXBvcnRhbnQgZHUgaDEgZ2xvYmFsICovXHJcbiAgICAuZm9udC1kcmFnb24sIC5uYXZiYXItYnJhbmQge1xyXG4gICAgICAgIGNvbG9yOiB2YXIoLS12aWtpbmctb3JhbmdlKSAhaW1wb3J0YW50O1xyXG4gICAgfVxyXG5cclxuICAgIC8qIExlIGgxIGRldmllbnQgZmxleGlibGUgOiBvcmFuZ2UgcGFyIGTDqWZhdXQsIG1haXMgbW9kaWZpYWJsZSBwYXIgUmVhY3QgKi9cclxuICAgIGgxIHtcclxuICAgICAgICBjb2xvcjogdmFyKC0tdmlraW5nLW9yYW5nZSk7XHJcbiAgICB9XHJcblxyXG4gICAgLyogLS0tIENsYXNzZSBwb3VyIGxlIHRpdHJlIGRlcyBhcnRpY2xlcyAtLS0gKi9cclxuICAgIC5hcnRpY2xlLWR5bmFtaWMtdGl0bGUge1xyXG4gICAgICAgIC8qIE9uIHV0aWxpc2UgIWltcG9ydGFudCBpY2kgcG91ciDDqnRyZSBzw7tyIGRlIGdhZ25lciBjb250cmUgbGUgaDEgZ2xvYmFsICovXHJcbiAgICAgICAgY29sb3I6IHZhcigtLWFydGljbGUtdGl0bGUtY29sb3IsICNmZmZmZmYpICFpbXBvcnRhbnQ7XHJcbiAgICAgICAgdHJhbnNpdGlvbjogY29sb3IgMC4zcyBlYXNlO1xyXG4gICAgfVxyXG5cclxuICAgIC8qIEFuaW1hdGlvbiBkZXMgYmFycmVzIGRlIHNvbiAqL1xyXG4gICAgQGtleWZyYW1lcyBlcXVhbGl6ZXIge1xyXG4gICAgICAwJSB7IGhlaWdodDogMTAlOyB9XHJcbiAgICAgIDUwJSB7IGhlaWdodDogMTAwJTsgfVxyXG4gICAgICAxMDAlIHsgaGVpZ2h0OiAxMCU7IH1cclxuICAgIH1cclxuICAgIC5hbmltYXRlLWJhciB7XHJcbiAgICAgIGFuaW1hdGlvbjogZXF1YWxpemVyIDFzIGluZmluaXRlIGVhc2UtaW4tb3V0O1xyXG4gICAgfVxyXG59Il0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==*/

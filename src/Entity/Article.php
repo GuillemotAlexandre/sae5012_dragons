@@ -21,13 +21,12 @@ use App\State\ArticleProcessor;
     operations: [
         new Get(),
         new GetCollection(),
-        // On ajoute le processor ici pour la création
         new Post(
             security: "is_granted('ROLE_AUTEUR')",
             processor: ArticleProcessor::class 
         ),
         new Patch(
-            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user) or is_granted('ROLE_DESIGNER')"
         ),
         new Delete(
             security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
@@ -56,13 +55,17 @@ class Article
     #[Groups(['article:read', 'article:write'])]
     private ?string $music = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['article:read', 'article:write'])]
+    private ?array $designConfig = null;
+
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Bloc::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Groups(['article:read', 'article:write'])]
     private Collection $blocs;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Groups(['article:read'])] // L'auteur est défini automatiquement ou via le write
+    #[Groups(['article:read'])]
     private ?User $author = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -113,6 +116,17 @@ class Article
     public function setSummary(?string $summary): self
     {
         $this->summary = $summary;
+        return $this;
+    }
+
+    public function getDesignConfig(): ?array
+    {
+        return $this->designConfig;
+    }
+
+    public function setDesignConfig(?array $designConfig): self
+    {
+        $this->designConfig = $designConfig;
         return $this;
     }
 
