@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,4 +23,18 @@
     .font-dragon, .navbar-brand, h1 {
         color: var(--viking-orange) !important;
     }
+
+body {
+    background-color: skyblue;
 }
+
+
+/* Animation des barres de son */
+@keyframes equalizer {
+  0% { height: 10%; }
+  50% { height: 100%; }
+  100% { height: 10%; }
+}
+.animate-bar {
+  animation: equalizer 1s infinite ease-in-out;
+}}
