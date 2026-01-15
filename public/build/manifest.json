@@ -3,5 +3,7 @@
   "build/app.js": "/build/app.js",
   "build/runtime.js": "/build/runtime.js",
   "build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-0e1323.js": "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-0e1323.js",
-  "build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-893f69.js": "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-893f69.js"
+  "build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-893f69.js": "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-893f69.js",
+  "build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-8bd4af.js": "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-8bd4af.js",
+  "build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-2230ce.js": "/build/vendors-node_modules_react-three_drei_core_Center_js-node_modules_react-three_drei_core_Stars-2230ce.js"
 }

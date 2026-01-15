@@ -38,8 +38,9 @@ class ArticleCreateController extends AbstractController
         $article->setCreatedAt(new \DateTime());
 
         // 2. Gestion des Blocs
-        // ⚠️ CORRECTION : On utilise 'blocs' (comme dans le React) et non 'blocks'
-        $blocsData = $request->request->all()['blocs'] ?? []; 
+        // 🛡️ SÉCURITÉ : On récupère tout le tableau, et on vérifie si 'blocs' existe
+        $allParams = $request->request->all();
+        $blocsData = $allParams['blocs'] ?? []; 
         $files = $request->files->get('blocs') ?? [];
 
         $uploadDirBlocs = $this->getParameter('kernel.project_dir') . '/public/uploads/blocs';
@@ -54,7 +55,7 @@ class ArticleCreateController extends AbstractController
                 // Contenu texte par défaut
                 $content = $data['content'] ?? '';
 
-                // CAS 1 : IMAGE (Upload de fichier)
+                // --- CAS 1 : IMAGE (Upload) ---
                 if ($data['type'] === 'image' && isset($files[$index]['imageFile'])) {
                     $uploadedFile = $files[$index]['imageFile'];
                     $ext = $uploadedFile->getClientOriginalExtension() ?: 'jpg';
@@ -67,16 +68,22 @@ class ArticleCreateController extends AbstractController
                         return $this->json(['error' => 'Erreur upload image'], 500);
                     }
                 } 
-                // CAS 2 : STATISTIQUES (Sélection d'un CSV existant)
+                // --- CAS 2 : STATISTIQUES (CSV) ---
                 elseif ($data['type'] === 'stats' || $data['type'] === 'viz') {
-                    // Le React nous envoie le type de graphique et le chemin du CSV choisi
                     $vizType = $data['vizType'] ?? 'bar';
                     $csvPath = $data['csvPath'] ?? ''; 
                     
-                    // On formate le contenu : "type_graphique::chemin_fichier"
-                    // Ex: "bar::/data/stats/population.csv"
+                    // On enregistre : "type::chemin"
                     if ($csvPath) {
                         $content = $vizType . '::' . $csvPath;
+                    }
+                }
+                // --- CAS 3 : MUSIQUE (Bloc) ---
+                // 👇 C'est ce qui manquait !
+                elseif ($data['type'] === 'music') {
+                    $musicFile = $data['musicFileName'] ?? '';
+                    if ($musicFile) {
+                        $content = $musicFile; // Ex: "dragons/theme.mp3"
                     }
                 }
 

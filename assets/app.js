@@ -13,6 +13,7 @@ import StatsPage from './pages/StatsPage';
 import Navbar from './components/Navbar';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import ArticleShow from './components/ArticleShow';
 
 // NOUVEAU : Import de la page Dashboard Admin
 import AdminDashboard from './pages/AdminDashboard';
@@ -39,7 +40,8 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/forum" element={<ForumPage />} />
-                        <Route path="/forum/article/:id" element={<ArticlePage />} />
+                        {/* <Route path="/forum/article/:id" element={<ArticlePage />} /> */}
+                        <Route path="/forum/article/:id" element={<ArticleShow />} />
                         <Route path="/statistique" element={<StatsPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/login" element={<LoginPage />} />

@@ -17,31 +17,32 @@ const ArticleForm = ({ id = null, onSuccess }) => {
     useEffect(() => {
         // 1. Musiques
         fetch('/api/music/list')
-            .then(res => res.ok ? res.json() : []) // Si erreur, on renvoie tableau vide
+            .then(res => res.ok ? res.json() : [])
             .then(data => {
-                // On s'assure que c'est bien un objet/tableau avant de set
                 if (data) setMusicLibrary(data);
             })
-            .catch(err => console.error("Erreur musique (ignorée)", err));
+            .catch(err => console.error("Erreur musique", err));
 
-        // 2. Datasets (CSV)
-        fetch('/api/datasets/list')
+        // 2. Datasets (CSV) - 👇 C'EST ICI QU'IL FAUT CHANGER !
+        // Avant c'était : fetch('/api/datasets/list')
+        // Maintenant c'est :
+        fetch('/api/list-datasets') 
             .then(res => {
                 if (!res.ok) throw new Error("Erreur API Dataset");
                 return res.json();
             })
             .then(data => {
-                // 👇 SÉCURITÉ : On ne met à jour que si c'est bien un tableau
+                console.log("Données reçues pour le graphique :", data); // 👀 Regarde ta console F12
+                
                 if (Array.isArray(data)) {
                     setDatasetLibrary(data);
                 } else {
-                    console.error("Format dataset invalide reçue du back:", data);
                     setDatasetLibrary([]);
                 }
             })
             .catch(err => {
                 console.error("Impossible de charger les datasets", err);
-                setDatasetLibrary([]); // En cas d'erreur, tableau vide = pas de crash
+                setDatasetLibrary([]);
             });
     }, []);
 
