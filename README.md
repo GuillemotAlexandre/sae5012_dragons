@@ -3,4 +3,4 @@
 on commence
 
 
-raph : commentaire, raiting, responsive + featur bonus
+raph : responsive + featur bonus + bouton modifier article qui doit modifier pas créé et appparaitre si on est editeur ou plus

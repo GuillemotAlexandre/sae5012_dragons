@@ -109,7 +109,7 @@ const CommentSection = ({ articleId }) => {
 
     // Charger les commentaires
     const fetchComments = () => {
-        fetch(`/api/comments?article=${articleId}`)
+        fetch(`/api/comments?article=${articleId}&parent[exists]=false`)
             .then((res) => res.json())
             .then((data) => {
                 // 1. On récupère la liste peu importe le nom de la clé

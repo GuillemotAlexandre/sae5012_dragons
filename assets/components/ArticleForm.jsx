@@ -13,7 +13,51 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
     const [loading, setLoading] = useState(false);
 
-    // --- CHARGEMENT DES DONNÉES ---
+    // --- 1. CHARGEMENT DES DONNÉES DE L'ARTICLE (SI MODIFICATION) ---
+    useEffect(() => {
+        if (id) {
+            setLoading(true);
+            fetch(`/api/articles/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTitle(data.title);
+                    setSummary(data.summary);
+                    
+                    // On formate les blocs reçus de l'API pour qu'ils marchent dans le formulaire
+                    const formattedBlocs = (data.blocs || [])
+                        .sort((a, b) => a.position - b.position)
+                        .map(b => {
+                            let vizType = 'bar';
+                            let content = b.content || '';
+                            
+                            // Si c'est un graphique, on sépare le type et l'URL (format "type::url")
+                            if (b.type === 'stats' || b.type === 'viz') {
+                                const parts = content.split('::');
+                                vizType = parts[0] || 'bar';
+                                content = parts[1] || ''; // L'URL du CSV devient le content/mediaUrl
+                            }
+
+                            return {
+                                id: b.id, // On garde l'ID pour savoir que ce bloc existe déjà
+                                type: b.type,
+                                content: content, // Texte ou URL
+                                mediaUrl: content, // Pour prévisualiser images/sons
+                                vizType: vizType,
+                                file: null
+                            };
+                        });
+                    
+                    setBlocs(formattedBlocs);
+                    setLoading(false);
+                })
+                .catch(err => {
+                    console.error("Erreur chargement article", err);
+                    setLoading(false);
+                });
+        }
+    }, [id]);
+
+    // --- CHARGEMENT DES LIBRAIRIES (Musique / Datasets) ---
     useEffect(() => {
         // 1. Musiques
         fetch('/api/music/list')
@@ -23,17 +67,13 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             })
             .catch(err => console.error("Erreur musique", err));
 
-        // 2. Datasets (CSV) - 👇 C'EST ICI QU'IL FAUT CHANGER !
-        // Avant c'était : fetch('/api/datasets/list')
-        // Maintenant c'est :
+        // 2. Datasets
         fetch('/api/list-datasets') 
             .then(res => {
                 if (!res.ok) throw new Error("Erreur API Dataset");
                 return res.json();
             })
             .then(data => {
-                console.log("Données reçues pour le graphique :", data); // 👀 Regarde ta console F12
-                
                 if (Array.isArray(data)) {
                     setDatasetLibrary(data);
                 } else {
@@ -54,7 +94,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             mediaUrl: '', 
             vizType: 'bar', 
             file: null,   
-            id: Date.now()
+            // Pas d'ID ici, c'est un nouveau bloc
         }]);
     };
 
@@ -78,55 +118,114 @@ const ArticleForm = ({ id = null, onSuccess }) => {
         }
     };
 
-    // --- SOUMISSION ---
+    // --- SOUMISSION (HYBRIDE : POST ou PATCH) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('summary', summary);
-
-        blocs.forEach((bloc, index) => {
-            formData.append(`blocs[${index}][type]`, bloc.type);
-            formData.append(`blocs[${index}][position]`, index + 1);
-
-            if (['h2', 'paragraph'].includes(bloc.type)) {
-                formData.append(`blocs[${index}][content]`, bloc.content);
-            }
-            
-            if (bloc.type === 'image' && bloc.file) {
-                formData.append(`blocs[${index}][imageFile]`, bloc.file);
-            }
-
-            if (bloc.type === 'stats') {
-                formData.append(`blocs[${index}][vizType]`, bloc.vizType);
-                formData.append(`blocs[${index}][csvPath]`, bloc.mediaUrl);
-            }
-
-            if (bloc.type === 'music') {
-                formData.append(`blocs[${index}][musicFileName]`, bloc.mediaUrl);
-            }
-        });
+        const token = localStorage.getItem('token');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('/api/custom/articles/create', { 
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
+            if (id) {
+                // 📝 MODE ÉDITION (PATCH JSON)
+                // Attention : L'upload de nouveaux fichiers image n'est pas géré ici pour simplifier.
+                // On met à jour textes, titres, choix musique/stats.
 
-            if (response.ok) {
-                alert("Votre récit a été gravé avec succès !");
-                onSuccess(); 
+                const articleData = {
+                    title,
+                    summary,
+                    blocs: blocs.map((bloc, index) => {
+                        let finalContent = bloc.content;
+
+                        // On reconstruit le format spécial pour les stats
+                        if (bloc.type === 'stats') {
+                            // Si l'utilisateur a changé l'URL via le select, c'est dans bloc.mediaUrl
+                            finalContent = `${bloc.vizType}::${bloc.mediaUrl}`;
+                        } else if (bloc.type === 'music') {
+                            finalContent = bloc.mediaUrl; // Le nom du fichier choisi
+                        } else if (bloc.type === 'image') {
+                            // Si pas de nouveau fichier, on garde l'ancienne URL
+                            finalContent = bloc.mediaUrl; 
+                        }
+
+                        // Structure d'un bloc pour l'API
+                        const blocPayload = {
+                            type: bloc.type,
+                            position: index + 1,
+                            content: finalContent
+                        };
+
+                        // Si le bloc avait déjà un ID, on l'envoie pour le mettre à jour (au lieu de le recréer)
+                        if (bloc.id) {
+                            blocPayload['@id'] = `/api/blocs/${bloc.id}`;
+                        }
+
+                        return blocPayload;
+                    })
+                };
+
+                const response = await fetch(`/api/articles/${id}`, { 
+                    method: 'PATCH',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/merge-patch+json' // Standard API Platform
+                    },
+                    body: JSON.stringify(articleData)
+                });
+
+                if (response.ok) {
+                    alert("Le récit a été réécrit avec succès !");
+                    onSuccess();
+                } else {
+                    throw new Error("Erreur lors de la modification");
+                }
+
             } else {
-                const errorData = await response.json();
-                alert("Erreur : " + (errorData.message || "Problème serveur"));
+                // ✨ MODE CRÉATION (POST FormData)
+                // C'est ton code d'origine qui gère bien l'upload initial
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('summary', summary);
+
+                blocs.forEach((bloc, index) => {
+                    formData.append(`blocs[${index}][type]`, bloc.type);
+                    formData.append(`blocs[${index}][position]`, index + 1);
+
+                    if (['h2', 'paragraph'].includes(bloc.type)) {
+                        formData.append(`blocs[${index}][content]`, bloc.content);
+                    }
+                    
+                    if (bloc.type === 'image' && bloc.file) {
+                        formData.append(`blocs[${index}][imageFile]`, bloc.file);
+                    }
+
+                    if (bloc.type === 'stats') {
+                        formData.append(`blocs[${index}][vizType]`, bloc.vizType);
+                        formData.append(`blocs[${index}][csvPath]`, bloc.mediaUrl);
+                    }
+
+                    if (bloc.type === 'music') {
+                        formData.append(`blocs[${index}][musicFileName]`, bloc.mediaUrl);
+                    }
+                });
+
+                const response = await fetch('/api/custom/articles/create', { 
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("Votre récit a été gravé avec succès !");
+                    onSuccess(); 
+                } else {
+                    const errorData = await response.json();
+                    alert("Erreur : " + (errorData.message || "Problème serveur"));
+                }
             }
+
         } catch (error) {
             console.error(error);
-            alert("Erreur serveur critique.");
+            alert("Une erreur est survenue.");
         } finally {
             setLoading(false);
         }
@@ -134,7 +233,9 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
     return (
         <form onSubmit={handleSubmit} className="bg-stone-900 p-8 border border-stone-800 shadow-2xl max-w-4xl mx-auto">
-            <h2 className="text-3xl font-dragon text-viking-gold mb-8 text-center uppercase">Nouvelle Chronique</h2>
+            <h2 className="text-3xl font-dragon text-viking-gold mb-8 text-center uppercase">
+                {id ? 'Modifier la Chronique' : 'Nouvelle Chronique'}
+            </h2>
 
             <div className="mb-6">
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-black/50 border border-stone-700 text-white p-4 text-2xl outline-none focus:border-viking-gold" placeholder="Titre..." required />
@@ -145,7 +246,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
             <div className="space-y-6 mb-8">
                 {blocs.map((bloc, index) => (
-                    <div key={bloc.id} className="bg-stone-800/50 p-6 border-l-4 border-viking-gold relative">
+                    <div key={bloc.id || index} className="bg-stone-800/50 p-6 border-l-4 border-viking-gold relative">
                         <button type="button" onClick={() => removeBloc(index)} className="absolute top-2 right-2 text-stone-500 hover:text-red-500 text-xs font-bold uppercase transition">Supprimer</button>
                         <p className="text-viking-gold text-xs uppercase font-bold mb-4 tracking-widest">Bloc {index + 1} : {bloc.type}</p>
 
@@ -156,12 +257,12 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                         {/* Image */}
                         {bloc.type === 'image' && (
                             <div>
-                                <input type="file" accept="image/*" onChange={(e) => handleFileChange(index, e)} className="text-stone-400 text-sm" />
+                                {!id && <input type="file" accept="image/*" onChange={(e) => handleFileChange(index, e)} className="text-stone-400 text-sm" />}
                                 {bloc.mediaUrl && <img src={bloc.mediaUrl} alt="Preview" className="mt-4 max-h-40 border border-stone-600" />}
                             </div>
                         )}
 
-                        {/* 👇 LE BLOC GRAPHIQUE CORRIGÉ */}
+                        {/* Stats */}
                         {bloc.type === 'stats' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-4">
@@ -173,14 +274,9 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                                             value={bloc.mediaUrl || ""}
                                         >
                                             <option value="">-- Choisir un jeu de données --</option>
-                                            {/* 👇 SÉCURITÉ MAXIMALE ICI */}
-                                            {Array.isArray(datasetLibrary) && datasetLibrary.length > 0 ? (
-                                                datasetLibrary.map(d => (
-                                                    <option key={d.id} value={d.source}>{d.name}</option>
-                                                ))
-                                            ) : (
-                                                <option disabled>Aucune donnée disponible (ou chargement...)</option>
-                                            )}
+                                            {Array.isArray(datasetLibrary) && datasetLibrary.map(d => (
+                                                <option key={d.id} value={d.source}>{d.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div>
@@ -199,7 +295,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Prévisualisation */}
                                 <div className="bg-black/20 border border-stone-800 flex items-center justify-center min-h-[200px] rounded">
                                     {bloc.mediaUrl ? (
                                         <CsvChart csvUrl={bloc.mediaUrl} vizType={bloc.vizType || 'bar'} />
@@ -212,7 +307,11 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
                         {/* Musique */}
                         {bloc.type === 'music' && (
-                            <select onChange={(e) => updateBloc(index, 'mediaUrl', e.target.value)} className="w-full bg-black border border-stone-600 p-3 text-white">
+                            <select 
+                                onChange={(e) => updateBloc(index, 'mediaUrl', e.target.value)} 
+                                className="w-full bg-black border border-stone-600 p-3 text-white"
+                                value={bloc.mediaUrl || ""}
+                            >
                                 <option value="">-- Choisir une mélodie --</option>
                                 {musicLibrary && Object.entries(musicLibrary).map(([folder, files]) => (
                                     <optgroup key={folder} label={folder.toUpperCase()}>
@@ -234,7 +333,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-viking-gold text-black font-black uppercase py-4 hover:bg-yellow-500 transition shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50">
-                {loading ? 'Gravure en cours...' : 'Publier la Chronique'}
+                {loading ? (id ? 'Réécriture...' : 'Gravure en cours...') : (id ? 'Mettre à jour le Récit' : 'Publier la Chronique')}
             </button>
         </form>
     );

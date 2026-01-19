@@ -33,12 +33,12 @@ class Bloc
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['bloc:read', 'article:read'])] // 👈 Visible dans l'article et dans le bloc
+    #[Groups(['article:read', 'bloc:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 50)]
     #[Assert\NotBlank]
-    #[Groups(['bloc:read', 'bloc:write', 'article:read', 'article:write'])]
+    #[Groups(['article:read', 'article:write', 'bloc:read', 'bloc:write'])]
     private ?string $type = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -46,11 +46,11 @@ class Bloc
     private ?string $title = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['bloc:read', 'bloc:write', 'article:read', 'article:write'])]
+    #[Groups(['article:read', 'article:write', 'bloc:read', 'bloc:write'])]
     private ?string $content = null;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['bloc:read', 'bloc:write', 'article:read', 'article:write'])]
+    #[Groups(['article:read', 'article:write', 'bloc:read', 'bloc:write'])]
     private ?int $position = null;
 
     #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'blocs')]

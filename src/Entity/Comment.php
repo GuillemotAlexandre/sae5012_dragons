@@ -18,6 +18,8 @@ use App\State\CommentProcessor;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 
+use ApiPlatform\Doctrine\Orm\Filter\ExistsFilter; // 👈 Et celui-là
+
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 #[ApiResource(
@@ -48,6 +50,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 )]
 
 #[ApiFilter(SearchFilter::class, properties: ['article' => 'exact'])] // 👈 AJOUTE ÇA SI BESOIN
+#[ApiFilter(ExistsFilter::class, properties: ['parent'])]
 class Comment
 {
     #[ORM\Id]
@@ -79,7 +82,7 @@ class Comment
     private ?Article $article = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'replies')]
-    #[Groups(['comment:write'])]
+    #[Groups(['comment:read', 'comment:write'])]
     private ?self $parent = null;
 
     #[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class, cascade: ['remove'])]
