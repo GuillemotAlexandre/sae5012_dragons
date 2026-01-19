@@ -15,12 +15,15 @@ const StarRating = ({ articleId, currentRating, onRate }) => {
                 <button
                     key={star}
                     type="button"
-                    className={`text-2xl transition-colors ${
-                        star <= (hover || rating) ? "text-viking-gold" : "text-stone-600"
+                    // MODIF : text-3xl sur mobile pour faciliter le clic, md:text-2xl sur desktop
+                    // Ajout de active:scale-125 pour un effet "pop" au toucher
+                    className={`text-3xl md:text-2xl transition-all duration-200 focus:outline-none active:scale-125 ${
+                        star <= (hover || rating) ? "text-viking-gold drop-shadow-md" : "text-stone-600"
                     }`}
                     onClick={() => handleRating(star)}
                     onMouseEnter={() => setHover(star)}
                     onMouseLeave={() => setHover(rating)}
+                    title={`Donner ${star} étoile(s)`}
                 >
                     ★
                 </button>

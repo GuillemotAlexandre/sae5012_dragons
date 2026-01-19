@@ -12,8 +12,7 @@ function DragonModel({ vitesseRotation, vitesseAnimation, facteurTaille, ...prop
   const { viewport } = useThree(); 
   
   // Calcul de base responsive
-  const baseScale = viewport.width < 5 ? 0.5 : 0.8; 
-  // 📏 CALCUL FINAL : Taille de base x Le curseur de l'utilisateur
+  const baseScale = viewport.width < 5 ? 0.35 : 0.8; 
   const finalScale = baseScale * facteurTaille;
 
   texture.flipY = false;
@@ -40,7 +39,6 @@ function DragonModel({ vitesseRotation, vitesseAnimation, facteurTaille, ...prop
     }
   }, [actions]);
 
-  // Mise à jour vitesse animation
   useEffect(() => {
     if (actions && actions[ANIMATION_NAME]) {
         actions[ANIMATION_NAME].timeScale = vitesseAnimation;
@@ -72,22 +70,19 @@ function DragonModel({ vitesseRotation, vitesseAnimation, facteurTaille, ...prop
       onClick={toggleAnimation}
       onPointerOver={() => document.body.style.cursor = 'pointer'}
       onPointerOut={() => document.body.style.cursor = 'auto'}
-      
-      scale={finalScale} // 👈 On applique la taille dynamique ici
-      
-      position={[0, 0.5, 0]} 
+      scale={finalScale} 
+      position={[0, -1, 0]} 
       {...props} 
     />
   );
 }
 
 const NightFuryScene = () => {
-  // 🎛️ ÉTATS DU TABLEAU DE BORD
   const [rotSpeed, setRotSpeed] = useState(0.001);
   const [animSpeed, setAnimSpeed] = useState(2.5);
-  const [sizeFactor, setSizeFactor] = useState(1); // 1 = taille normale (100%)
+  const [sizeFactor, setSizeFactor] = useState(1); 
+  const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Fonction pour tout remettre à zéro
   const handleReset = () => {
     setRotSpeed(0.001);
     setAnimSpeed(2.5);
@@ -95,92 +90,106 @@ const NightFuryScene = () => {
   };
 
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full relative overflow-hidden bg-[#050510]">
       
       <Canvas shadows camera={{ position: [0, 2, 10], fov: 45 }}>
         <color attach="background" args={['#050510']} />
-        
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-
         <ambientLight intensity={3} />
         <directionalLight position={[10, 10, 5]} intensity={4} />
         <spotLight position={[-5, 5, 10]} intensity={5} color="#a855f7" />
         <spotLight position={[0, 5, -10]} intensity={5} color="#ffffff" />
 
-        <Suspense fallback={<Html center><div className="text-white">Invocation...</div></Html>}>
+        <Suspense fallback={<Html center><div className="text-white text-xs animate-pulse">Invocation...</div></Html>}>
           <Center top>
             <DragonModel 
                 vitesseRotation={rotSpeed} 
                 vitesseAnimation={animSpeed}
-                facteurTaille={sizeFactor} // 👈 On envoie la taille
+                facteurTaille={sizeFactor} 
             />
           </Center>
         </Suspense>
       </Canvas>
 
+      {/* 🎛️ BOUTON TOGGLE (Mobile uniquement) */}
+      <button 
+        onClick={() => setControlsVisible(!controlsVisible)}
+        className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur text-viking-gold p-3 rounded-full border border-viking-gold/30 md:hidden shadow-lg active:scale-95 transition-transform"
+      >
+        {controlsVisible ? '✕' : '⚙️'}
+      </button>
+
       {/* 🎛️ UI PANNEAU DE CONTRÔLE */}
-      <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md p-4 rounded-xl border border-blue-500/30 text-white w-64 shadow-2xl transition-all hover:bg-black/80">
-        <h3 className="text-blue-300 font-bold mb-4 text-center border-b border-white/10 pb-2">
-            CONTRÔLES DU DRAGON
-        </h3>
-
-        {/* 1. Taille (Zoom) */}
-        <div className="mb-4">
-            <div className="flex justify-between text-xs mb-1">
-                <span>Taille</span>
-                <span className="text-green-400">x{sizeFactor.toFixed(1)}</span>
-            </div>
-            <input 
-                type="range" 
-                min="0.1" 
-                max="3" 
-                step="0.1" 
-                value={sizeFactor}
-                onChange={(e) => setSizeFactor(parseFloat(e.target.value))}
-                className="w-full accent-green-500 cursor-pointer h-2 bg-gray-700 rounded-lg appearance-none"
-            />
-        </div>
-
-        {/* 2. Rotation */}
-        <div className="mb-4">
-            <div className="flex justify-between text-xs mb-1">
-                <span>Rotation</span>
-                <span className="text-blue-400">{rotSpeed.toFixed(3)}</span>
-            </div>
-            <input 
-                type="range" 
-                min="0" 
-                max="0.05" 
-                step="0.001" 
-                value={rotSpeed}
-                onChange={(e) => setRotSpeed(parseFloat(e.target.value))}
-                className="w-full accent-blue-500 cursor-pointer h-2 bg-gray-700 rounded-lg appearance-none"
-            />
-        </div>
-
-        {/* 3. Vitesse Animation */}
-        <div className="mb-2">
-            <div className="flex justify-between text-xs mb-1">
-                <span>Animation</span>
-                <span className="text-purple-400">x{animSpeed.toFixed(1)}</span>
-            </div>
-            <input 
-                type="range" 
-                min="0" 
-                max="5" 
-                step="0.1" 
-                value={animSpeed}
-                onChange={(e) => setAnimSpeed(parseFloat(e.target.value))}
-                className="w-full accent-purple-500 cursor-pointer h-2 bg-gray-700 rounded-lg appearance-none"
-            />
-        </div>
+      {/* MODIF ERGONOMIQUE : 
+          - Mobile : "bottom-0 w-full rounded-t-2xl" (glisse du bas)
+          - Desktop : "top-4 right-4 w-64 rounded-xl" (flotte en haut à droite)
+      */}
+      <div className={`
+        absolute z-10 bg-black/80 backdrop-blur-md text-white border border-blue-500/30 shadow-2xl transition-all duration-300 ease-in-out
         
-        <button 
-            onClick={handleReset}
-            className="w-full mt-4 bg-white/10 hover:bg-red-500/50 py-1 rounded text-xs transition-colors border border-white/10"
-        >
-            Réinitialiser
-        </button>
+        /* Styles Mobile (Bottom Sheet) */
+        bottom-0 left-0 w-full rounded-t-2xl p-6 pb-8
+        ${controlsVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}
+
+        /* Styles Desktop (Floating Box) */
+        md:bottom-auto md:left-auto md:top-4 md:right-4 md:w-64 md:rounded-xl md:p-4 md:pb-4
+        md:translate-y-0 md:opacity-100 md:pointer-events-auto
+      `}>
+        
+        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+            <h3 className="text-blue-300 font-bold text-sm uppercase tracking-wider">
+                Paramètres
+            </h3>
+            {/* Bouton reset discret */}
+            <button 
+                onClick={handleReset}
+                className="text-[10px] text-stone-400 hover:text-white uppercase font-bold underline decoration-dotted"
+            >
+                Reset
+            </button>
+        </div>
+
+        {/* CONTROLES COMPACTS */}
+        <div className="space-y-4">
+            {/* 1. Taille */}
+            <div>
+                <div className="flex justify-between text-xs mb-1 text-stone-300">
+                    <span>Taille</span>
+                    <span className="text-green-400 font-mono">x{sizeFactor.toFixed(1)}</span>
+                </div>
+                <input 
+                    type="range" min="0.1" max="3" step="0.1" 
+                    value={sizeFactor} onChange={(e) => setSizeFactor(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                />
+            </div>
+
+            {/* 2. Rotation */}
+            <div>
+                <div className="flex justify-between text-xs mb-1 text-stone-300">
+                    <span>Vitesse Rotation</span>
+                    <span className="text-blue-400 font-mono">{(rotSpeed * 1000).toFixed(0)}</span>
+                </div>
+                <input 
+                    type="range" min="0" max="0.05" step="0.001" 
+                    value={rotSpeed} onChange={(e) => setRotSpeed(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+            </div>
+
+            {/* 3. Animation */}
+            <div>
+                <div className="flex justify-between text-xs mb-1 text-stone-300">
+                    <span>Vitesse Animation</span>
+                    <span className="text-purple-400 font-mono">x{animSpeed.toFixed(1)}</span>
+                </div>
+                <input 
+                    type="range" min="0" max="5" step="0.1" 
+                    value={animSpeed} onChange={(e) => setAnimSpeed(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+            </div>
+        </div>
       </div>
 
     </div>

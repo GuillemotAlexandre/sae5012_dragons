@@ -80,38 +80,44 @@ const StatsPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto animate-fade-in">
-        <div className="text-center mb-12">
-            <h1 className="text-5xl font-dragon text-viking-gold mb-4 drop-shadow-md">
+    // MODIF : px-4 sur mobile, pb-12 pour le scroll
+    <div className="max-w-6xl mx-auto animate-fade-in px-4 pb-12">
+        {/* MODIF : mb-8 sur mobile, mb-12 sur desktop */}
+        <div className="text-center mb-8 md:mb-12">
+            {/* MODIF : text-3xl sur mobile */}
+            <h1 className="text-3xl md:text-5xl font-dragon text-viking-gold mb-4 drop-shadow-md">
                 L'Observatoire de Berk
             </h1>
-            <p className="text-viking-light text-lg italic border-b border-viking-gold/30 inline-block pb-2">
+            <p className="text-viking-light text-sm md:text-lg italic border-b border-viking-gold/30 inline-block pb-2">
                 Recensement officiel de l'archipel
             </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="bg-viking-rock p-4 md:p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
-                <h3 className="text-2xl font-dragon text-white mb-6">Trésor de Guerre</h3>
-                <div className="h-64 relative">
-                    {boxOfficeData ? <Bar options={options} data={boxOfficeData} /> : <p className="text-center mt-10">Chargement...</p>}
+                {/* MODIF : text-xl sur mobile */}
+                <h3 className="text-xl md:text-2xl font-dragon text-white mb-4 md:mb-6">Trésor de Guerre</h3>
+                {/* MODIF : h-56 sur mobile, h-64 sur desktop */}
+                <div className="h-56 md:h-64 relative">
+                    {boxOfficeData ? <Bar options={options} data={boxOfficeData} /> : <p className="text-center mt-10 text-stone-500 italic">Chargement des données...</p>}
                 </div>
             </div>
 
-            <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
+            <div className="bg-viking-rock p-4 md:p-6 rounded-lg border-2 border-stone-600 shadow-2xl relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
-                <h3 className="text-2xl font-dragon text-white mb-6">Clans & Tribus</h3>
-                <div className="h-64 relative flex justify-center">
-                    {populationData ? <Doughnut options={{...options, scales:{}}} data={populationData} /> : <p className="text-center mt-10">Chargement...</p>}
+                <h3 className="text-xl md:text-2xl font-dragon text-white mb-4 md:mb-6">Clans & Tribus</h3>
+                <div className="h-56 md:h-64 relative flex justify-center">
+                    {populationData ? <Doughnut options={{...options, scales:{}}} data={populationData} /> : <p className="text-center mt-10 text-stone-500 italic">Chargement des clans...</p>}
                 </div>
             </div>
 
-            <div className="bg-viking-rock p-6 rounded-lg border-2 border-stone-600 shadow-2xl md:col-span-2 relative">
+            <div className="bg-viking-rock p-4 md:p-6 rounded-lg border-2 border-stone-600 shadow-2xl md:col-span-2 relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-viking-gold"></div>
-                <h3 className="text-2xl font-dragon text-white mb-6">Chronologie des Découvertes</h3>
-                <div className="h-80 relative">
-                    {timelineData ? <Line options={options} data={timelineData} /> : <p className="text-center mt-10">Chargement...</p>}
+                <h3 className="text-xl md:text-2xl font-dragon text-white mb-4 md:mb-6">Chronologie des Découvertes</h3>
+                {/* MODIF : h-64 sur mobile, h-80 sur desktop */}
+                <div className="h-64 md:h-80 relative">
+                    {timelineData ? <Line options={options} data={timelineData} /> : <p className="text-center mt-10 text-stone-500 italic">Analyse temporelle...</p>}
                 </div>
             </div>
         </div>

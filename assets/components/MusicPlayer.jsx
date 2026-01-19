@@ -32,21 +32,31 @@ const MusicPlayer = ({ musicPath }) => {
     if (!musicPath) return null;
 
     return (
-        <div className="bg-viking-rock border-2 border-viking-gold/50 rounded-xl p-4 mb-8 shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-viking-red rounded-full blur-[80px] opacity-20"></div>
+        // MODIF : p-3 et mb-6 sur mobile, p-4 et mb-8 sur desktop
+        <div className="bg-viking-rock border-2 border-viking-gold/50 rounded-xl p-3 md:p-4 mb-6 md:mb-8 shadow-xl relative overflow-hidden group w-full">
             
-            <div className="relative z-10 flex items-center gap-6">
-                <button onClick={togglePlay} className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-viking-fire to-red-800 hover:scale-105 transition flex items-center justify-center shadow-lg border border-viking-gold">
+            {/* Décoration : w-24 sur mobile */}
+            <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-viking-red rounded-full blur-[60px] md:blur-[80px] opacity-20 pointer-events-none"></div>
+            
+            {/* MODIF : gap-4 sur mobile */}
+            <div className="relative z-10 flex items-center gap-4 md:gap-6">
+                
+                {/* MODIF : w-12 h-12 sur mobile, w-14 h-14 sur desktop */}
+                <button 
+                    onClick={togglePlay} 
+                    className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-viking-fire to-red-800 hover:scale-105 transition flex items-center justify-center shadow-lg border border-viking-gold active:scale-95"
+                >
                     {isPlaying ? (
-                        <span className="text-2xl text-white">❚❚</span>
+                        <span className="text-xl md:text-2xl text-white">❚❚</span>
                     ) : (
-                        <span className="text-2xl text-white ml-1">▶</span>
+                        <span className="text-xl md:text-2xl text-white ml-1">▶</span>
                     )}
                 </button>
 
-                <div className="flex-1">
-                    <h4 className="text-viking-gold font-dragon text-lg">Ambiance Draconique</h4>
-                    <div className="relative w-full h-2 bg-stone-700 rounded-full mt-2">
+                <div className="flex-1 min-w-0"> {/* min-w-0 pour gérer le truncate si besoin */}
+                    {/* MODIF : text-base sur mobile */}
+                    <h4 className="text-viking-gold font-dragon text-base md:text-lg truncate">Ambiance Draconique</h4>
+                    <div className="relative w-full h-2 bg-stone-700 rounded-full mt-2 overflow-hidden">
                         <div className="absolute top-0 left-0 h-full bg-viking-fire rounded-full transition-all duration-100" style={{ width: `${progress}%` }}></div>
                     </div>
                 </div>
