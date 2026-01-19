@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260115151909 extends AbstractMigration
+final class Version20260119122548 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,12 @@ final class Version20260115151909 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE article ADD average_rating DOUBLE PRECISION DEFAULT NULL, DROP content');
+        $this->addSql('ALTER TABLE article ADD average_rating DOUBLE PRECISION DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE article ADD content LONGTEXT DEFAULT NULL, DROP average_rating');
+        $this->addSql('ALTER TABLE article DROP average_rating');
     }
 }

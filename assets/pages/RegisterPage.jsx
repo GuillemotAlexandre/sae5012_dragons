@@ -86,7 +86,6 @@ const RegisterPage = () => {
                         <option value="ROLE_EDITEUR">Éditeur (Gardien)</option>
                         <option value="ROLE_DESIGNER">Designeur (Artisan)</option>
                         <option value="ROLE_FOURNISSEUR">Fournisseur de données (Scribe)</option>
-                        <option value="ROLE_ADMIN">Administrateur (Chef de la Guilde)</option>
                     </select>
                 </div>
 
