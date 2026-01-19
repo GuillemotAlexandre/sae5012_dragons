@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import DataProviderSpace from '../components/DataProviderSpace'; // On l'importera juste après
+import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
@@ -129,9 +130,28 @@ const AdminDashboard = () => {
                 {activeTab === 'articles' && (
                     <div className="grid gap-2 animate-fadeIn">
                         {data.managementArticles?.map(art => (
-                            <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex justify-between">
-                                <span>{art.title} <small className="text-stone-500 ml-2">par {art.author}</small></span>
-                                <span className="text-stone-600 text-xs">{art.createdAt}</span>
+                            <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex justify-between items-center hover:border-viking-gold transition-colors group">
+                                <div>
+                                    {/* 👇 LE LIEN CLIQUABLE EST ICI */}
+                                    <Link 
+                                        to={`/article/${art.id}`} 
+                                        className="font-bold text-viking-parchment group-hover:text-viking-gold transition-colors text-lg"
+                                    >
+                                        {art.title}
+                                    </Link>
+                                    <span className="text-stone-500 ml-2 text-sm">par {art.author}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-4">
+                                    <span className="text-stone-600 text-xs">{art.createdAt}</span>
+                                    {/* Petit bouton "Voir" optionnel pour être explicite */}
+                                    <Link 
+                                        to={`/article/${art.id}`}
+                                        className="text-[10px] uppercase border border-stone-600 px-2 py-1 text-stone-400 group-hover:border-viking-gold group-hover:text-viking-gold transition"
+                                    >
+                                        Voir →
+                                    </Link>
+                                </div>
                             </div>
                         ))}
                     </div>
