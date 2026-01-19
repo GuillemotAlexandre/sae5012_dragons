@@ -10,7 +10,7 @@ security:
                 class: App\Entity\User
                 property: email # On utilise l'email comme identifiant unique
 
-    # 3. Hiérarchie des rôles (Tes réglages optimisés)
+    # 3. Hiérarchie des rôles
     role_hierarchy:
         ROLE_ABONNE:      ROLE_USER
         ROLE_AUTEUR:      ROLE_ABONNE
@@ -56,12 +56,11 @@ security:
 
     # 5. Contrôle d'accès (Access Control)
     access_control:
-        # --- ROUTES PUBLIQUES ---
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        # Lecture du forum accessible à tous
+        # ✅ On autorise tout le monde (Public + User) à LIRE les articles
         - { path: ^/api/articles, roles: PUBLIC_ACCESS, methods: [GET] }
+        
+        # ✅ On autorise tout le monde à LIRE les commentaires
+        - { path: ^/api/comments, roles: PUBLIC_ACCESS, methods: [GET] }
 
         # --- ROUTES DASHBOARD (NOUVEAU) ---
         # On sécurise l'API de statistiques pour les Éditeurs et Admins

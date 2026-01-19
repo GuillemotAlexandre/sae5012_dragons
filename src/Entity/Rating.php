@@ -10,17 +10,19 @@ use App\Repository\RatingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\State\RatingProcessor;
+
+
+
 
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
 #[ApiResource(
     operations: [
         new Get(),
         new GetCollection(),
-        // Seul l'abonné (et les rôles supérieurs) peut créer une note
         new Post(
-            security: "is_granted('ROLE_ABONNE')",
-            // On peut réutiliser le même processeur que pour Article pour l'auteur
-            processor: \App\State\ArticleProcessor::class 
+            security: "is_granted('ROLE_USER')",
+            processor: RatingProcessor::class // 👈 C'est OBLIGATOIRE ici
         )
     ],
     normalizationContext: ['groups' => ['rating:read']],

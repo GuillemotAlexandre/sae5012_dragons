@@ -7,37 +7,84 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiResource;
+
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Link;
+use App\State\CommentProcessor;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(normalizationContext: ['groups' => ['comment:read']]),
+        // 👇 Sécurité : Seul un utilisateur connecté (ROLE_USER) peut poster
+        new GetCollection(normalizationContext: ['groups' => ['comment:read']]),
+
+        new Post(
+            security: "is_granted('ROLE_USER')", 
+            denormalizationContext: ['groups' => ['comment:write']],
+            processor: CommentProcessor::class
+        ),
+    ],
+    normalizationContext: ['groups' => ['comment:read']],
+    denormalizationContext: ['groups' => ['comment:write']],
+    order: ['score' => 'DESC'] // 👈 TRI REDDIT : Les meilleurs scores en premier par défaut
+)]
+
+#[ApiResource(
+    uriTemplate: '/articles/{id}/comments',
+    operations: [ new GetCollection() ],
+    uriVariables: [
+        'id' => new Link(toProperty: 'article', fromClass: Article::class)
+    ],
+    normalizationContext: ['groups' => ['comment:read']],
+    order: ['score' => 'DESC'] 
+)]
+
+#[ApiFilter(SearchFilter::class, properties: ['article' => 'exact'])] // 👈 AJOUTE ÇA SI BESOIN
 class Comment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['comment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['comment:read', 'comment:write'])]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['comment:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
+    #[Groups(['comment:read'])]
     private ?int $score = 0;
 
-    #[ORM\ManyToOne(inversedBy: 'comments')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['comment:read'])]
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['comment:write'])]
     private ?Article $article = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'replies')]
+    #[Groups(['comment:write'])]
     private ?self $parent = null;
 
     #[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class, cascade: ['remove'])]
-    #[ORM\OrderBy(['score' => 'DESC'])]
+    #[ORM\OrderBy(['score' => 'DESC'])] 
+    #[Groups(['comment:read'])]
     private Collection $replies;
 
     // 👇 CORRECTION ICI : 'remove: true' n'existe pas, c'est 'orphanRemoval: true'

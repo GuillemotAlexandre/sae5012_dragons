@@ -8,6 +8,9 @@ const ForumPage = () => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
     
+    // État pour le tri
+    const [sortOrder, setSortOrder] = useState('newest');
+
     // Gestion de la navigation interne
     const [view, setView] = useState('list'); // 'list', 'create', 'edit'
     const [selectedId, setSelectedId] = useState(null);
@@ -18,20 +21,33 @@ const ForumPage = () => {
         if (token) {
             try { 
                 const decoded = jwtDecode(token);
-                console.log("Guerrier connecté :", decoded);
+                // console.log("Guerrier connecté :", decoded); // Décommenter si besoin
                 setUser(decoded); 
             } catch (e) {
                 console.error("Badge (Token) invalide ou expiré");
             }
         }
-        // 2. Chargement des chroniques
-        fetchArticles();
+        // Le chargement se fait via le useEffect du sortOrder ci-dessous
     }, []);
+
+    // Recharger quand le tri change
+    useEffect(() => {
+        fetchArticles();
+    }, [sortOrder]);
 
     const fetchArticles = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/articles', { 
+            let url = '/api/articles';
+            // Logique de tri API Platform
+            switch (sortOrder) {
+                case 'best_rating': url += '?order[averageRating]=desc'; break;
+                case 'worst_rating': url += '?order[averageRating]=asc'; break;
+                case 'oldest': url += '?order[createdAt]=asc'; break;
+                case 'newest': default: url += '?order[createdAt]=desc'; break;
+            }
+
+            const res = await fetch(url, { 
                 headers: { 'Accept': 'application/ld+json' } 
             });
             const data = await res.json();
@@ -74,11 +90,20 @@ const ForumPage = () => {
         fetchArticles(); 
     };
 
-    // --- LOGIQUE DES RÔLES ---
-    const hasRole = (role) => user?.roles?.includes(role);
-    
-    // Autorise la création pour Admin, Auteur ET Éditeur
-    const canCreate = hasRole('ROLE_ADMIN') || hasRole('ROLE_AUTEUR') || hasRole('ROLE_EDITEUR');
+    // 🛡️ --- NOUVELLE LOGIQUE DES RÔLES (GUESTS/USERS/AUTEURS/EDITEURS) --- 🛡️
+    const userRoles = user?.roles || [];
+
+    // 1. Ceux qui peuvent TOUT modifier (Éditeur, Admin, Designer, Fournisseur)
+    const superEditors = ['ROLE_EDITEUR', 'ROLE_ADMIN', 'ROLE_DESIGNER', 'ROLE_FOURNISSEUR'];
+    const isSuperEditor = superEditors.some(r => userRoles.includes(r));
+
+    // 2. Est-ce un auteur ?
+    const isAuthor = userRoles.includes('ROLE_AUTEUR');
+
+    // 3. Qui peut créer ? (Auteurs + Super Editeurs)
+    // Note : ROLE_USER (Abonné) n'est PAS inclus ici, il ne voit pas le bouton.
+    const canCreate = isSuperEditor || isAuthor;
+
 
     if (loading && view === 'list') {
         return (
@@ -93,19 +118,36 @@ const ForumPage = () => {
         <div className="max-w-6xl mx-auto px-4 pb-20">
             
             {/* --- HEADER --- */}
-            <div className="flex justify-between items-end mb-12 border-b border-viking-gold/20 pb-8">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-viking-gold/20 pb-8 gap-4">
                 <div>
                     <h1 className="text-6xl font-dragon text-viking-parchment uppercase tracking-tighter">Chroniques</h1>
                     <p className="text-stone-500 italic text-sm mt-2">Le savoir du village de Berk, gravé pour l'éternité.</p>
                 </div>
                 
-                {view === 'list' && canCreate && (
-                    <button 
-                        onClick={() => setView('create')}
-                        className="bg-viking-gold text-black px-8 py-3 font-black hover:bg-yellow-500 transition shadow-[0_0_20px_rgba(212,175,55,0.2)] uppercase text-xs tracking-widest"
-                    >
-                        + Graver un récit
-                    </button>
+                {view === 'list' && (
+                    <div className="flex items-center gap-4">
+                        {/* SELECTEUR DE TRI */}
+                        <select 
+                            value={sortOrder} 
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className="bg-black/50 border border-viking-gold/50 text-viking-gold py-3 px-4 rounded cursor-pointer uppercase text-xs font-bold tracking-widest focus:outline-none focus:border-viking-gold hover:bg-stone-900 transition"
+                        >
+                            <option value="newest">📅 Plus Récents</option>
+                            <option value="oldest">📜 Plus Anciens</option>
+                            <option value="best_rating">🌟 Mieux Notés</option>
+                            <option value="worst_rating">💀 Moins Notés</option>
+                        </select>
+
+                        {/* 🔒 BOUTON CRÉER : Caché pour les simples abonnés */}
+                        {canCreate && (
+                            <button 
+                                onClick={() => setView('create')}
+                                className="bg-viking-gold text-black px-8 py-3 font-black hover:bg-yellow-500 transition shadow-[0_0_20px_rgba(212,175,55,0.2)] uppercase text-xs tracking-widest"
+                            >
+                                + Graver un récit
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
 
@@ -129,17 +171,32 @@ const ForumPage = () => {
                         articles.map((article) => {
                             const cleanId = (article.id || article['@id']).toString().split('/').pop();
                             
-                            // Vérification de propriété (L'auteur du post OU un rôle de modération)
-                            const isOwner = user?.id === article.author?.id || hasRole('ROLE_ADMIN') || hasRole('ROLE_EDITEUR');
+                            // 🛡️ PERMISSIONS PAR ARTICLE
+                            // Je suis propriétaire SI mon ID = ID de l'auteur
+                            const isOwner = user?.id === article.author?.id;
+
+                            // J'ai le droit de modifier SI :
+                            // 1. Je suis un Super Editeur (peu importe l'auteur)
+                            // 2. OU ALORS je suis Auteur ET c'est MON article
+                            const canEditThis = isSuperEditor || (isAuthor && isOwner);
 
                             return (
                                 <article key={cleanId} className="group bg-stone-900/40 border-l-4 border-stone-800 hover:border-viking-gold transition-all duration-300 p-8 relative">
                                     <div className="flex justify-between items-start mb-4">
-                                        <h2 className="text-3xl font-dragon text-viking-gold group-hover:text-white transition-colors uppercase">
-                                            {article.title}
-                                        </h2>
+                                        <div className="flex items-center gap-4">
+                                            <h2 className="text-3xl font-dragon text-viking-gold group-hover:text-white transition-colors uppercase">
+                                                {article.title}
+                                            </h2>
+                                            {/* Badge Note */}
+                                            {article.averageRating && (
+                                                <span className="text-yellow-500 text-sm font-bold border border-yellow-500/30 px-2 py-0.5 rounded bg-yellow-500/10">
+                                                    ★ {article.averageRating}
+                                                </span>
+                                            )}
+                                        </div>
                                         
-                                        {isOwner && (
+                                        {/* 🔒 BOUTONS D'ACTION PROTÉGÉS */}
+                                        {canEditThis && (
                                             <div className="flex gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <button 
                                                     onClick={() => { setSelectedId(cleanId); setView('edit'); }}
@@ -169,7 +226,7 @@ const ForumPage = () => {
                                             </span>
                                         </div>
                                         <Link 
-                                            to={`/forum/article/${cleanId}`} 
+                                            to={`/article/${cleanId}`} 
                                             className="text-viking-fire font-black text-[10px] uppercase tracking-widest hover:text-viking-gold transition-colors flex items-center gap-2"
                                         >
                                             Consulter le parchemin <span className="text-lg">→</span>
