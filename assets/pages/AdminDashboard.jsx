@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import DataProviderSpace from '../components/DataProviderSpace';
-import DesignerSpace from '../components/DesignerSpace';
+import { Link } from 'react-router-dom';
+import ArticleForm from '../components/ArticleForm';
 
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('stats');
+    const [editingId, setEditingId] = useState(null);
 
     const token = localStorage.getItem('token');
     let currentUser = null;
@@ -18,7 +20,6 @@ const AdminDashboard = () => {
         console.error("Erreur de décodage du token");
     }
 
-    // Définition des accès selon les rôles
     const roles = currentUser?.roles || [];
     const isFullAdmin = roles.includes('ROLE_ADMIN');
     const isProvider = roles.includes('ROLE_FOURNISSEUR') || isFullAdmin;
@@ -44,6 +45,34 @@ const AdminDashboard = () => {
         loadStats();
     }, []);
 
+    const handleDeleteArticle = async (id) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir brûler ce parchemin définitivement ?")) return;
+
+        try {
+            const res = await fetch(`/api/articles/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setData(prev => ({
+                    ...prev,
+                    managementArticles: prev.managementArticles.filter(art => art.id !== id)
+                }));
+            } else {
+                alert("Erreur : Impossible de supprimer (Droits insuffisants ?)");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erreur serveur.");
+        }
+    };
+
+    const handleEditSuccess = () => {
+        setEditingId(null);
+        loadStats();
+    }
+
     const handlePromote = async (userId) => {
         try {
             const response = await fetch(`/api/admin/user/${userId}/promote`, {
@@ -68,33 +97,32 @@ const AdminDashboard = () => {
     if (!data) return <div className="text-yellow-500 p-10 font-dragon animate-pulse text-center">Appel au Grand Conseil...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto p-6 text-white min-h-screen">
-            <h1 className="text-5xl font-dragon text-stone-200 mb-10 border-b border-yellow-700/30 pb-4 uppercase tracking-tighter">
+        // MODIF : p-4 sur mobile, p-6 sur desktop
+        <div className="max-w-6xl mx-auto p-4 md:p-6 text-white pb-20">
+            {/* MODIF : Taille du titre réduite sur mobile */}
+            <h1 className="text-3xl md:text-5xl font-dragon text-viking-parchment mb-6 md:mb-10 border-b border-viking-gold/30 pb-4 uppercase text-center md:text-left">
                 Palais d'Administration
             </h1>
 
-            {/* Navigation par Onglets */}
-            <div className="flex flex-wrap gap-2 mb-8 border-b border-stone-800 pb-4">
-                <button 
-                    onClick={() => setActiveTab('stats')} 
-                    className={`px-6 py-2 text-xs font-black uppercase transition-all ${activeTab === 'stats' ? 'bg-yellow-600 text-black scale-105' : 'bg-stone-900 text-stone-500 hover:bg-stone-800'}`}>
-                    Vue d'ensemble
-                </button>
+            {/* Navigation par Onglets responsive */}
+            {/* MODIF : flex-wrap permet aux boutons de passer à la ligne sur mobile */}
+            <div className="flex flex-wrap gap-2 mb-8 border-b border-stone-800 pb-4 justify-center md:justify-start">
+                <button onClick={() => setActiveTab('stats')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'stats' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Vue d'ensemble</button>
                 
                 {isFullAdmin && (
-                    <button onClick={() => setActiveTab('users')} className={`px-6 py-2 text-xs font-black uppercase transition-all ${activeTab === 'users' ? 'bg-yellow-600 text-black scale-105' : 'bg-stone-900 text-stone-500 hover:bg-stone-800'}`}>Population</button>
+                    <button onClick={() => setActiveTab('users')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'users' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Population</button>
                 )}
                 
                 {isEditor && (
-                    <button onClick={() => setActiveTab('articles')} className={`px-6 py-2 text-xs font-black uppercase transition-all ${activeTab === 'articles' ? 'bg-yellow-600 text-black scale-105' : 'bg-stone-900 text-stone-500 hover:bg-stone-800'}`}>Chroniques</button>
+                    <button onClick={() => setActiveTab('articles')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'articles' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Chroniques</button>
                 )}
 
                 {isProvider && (
-                    <button onClick={() => setActiveTab('data')} className={`px-6 py-2 text-xs font-black uppercase transition-all ${activeTab === 'data' ? 'bg-yellow-600 text-black scale-105' : 'bg-stone-900 text-stone-500 hover:bg-stone-800'}`}>Données (CSV)</button>
+                    <button onClick={() => setActiveTab('data')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'data' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Données (CSV)</button>
                 )}
 
                 {isDesigner && (
-                    <button onClick={() => setActiveTab('design')} className={`px-6 py-2 text-xs font-black uppercase transition-all ${activeTab === 'design' ? 'bg-yellow-600 text-black scale-105' : 'bg-stone-900 text-stone-500 hover:bg-stone-800'}`}>Apparence</button>
+                    <button onClick={() => setActiveTab('design')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'design' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Apparence</button>
                 )}
             </div>
 
@@ -120,36 +148,81 @@ const AdminDashboard = () => {
                     <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
                         <input 
                             type="text" 
-                            placeholder="Chercher un guerrier dans la brume..." 
-                            className="bg-black/60 border border-yellow-900/30 p-4 rounded text-sm w-full outline-none focus:border-yellow-600 transition-colors"
+                            placeholder="Chercher un guerrier..." 
+                            className="bg-black/40 border border-viking-gold/20 p-3 rounded text-sm w-full outline-none focus:border-viking-gold"
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <div className="grid gap-3">
-                            {data.allUsers?.filter(u => u.pseudo.toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
-                                <div key={u.id} className="flex justify-between items-center p-4 bg-stone-900/40 border border-stone-800 rounded hover:border-stone-700 transition-all">
-                                    <div>
-                                        <p className="font-bold text-stone-200">{u.pseudo}</p>
-                                        <p className="text-[10px] text-stone-500 uppercase tracking-tighter">{u.roles.join(' • ')}</p>
-                                    </div>
-                                    <button onClick={() => handlePromote(u.id)} className="text-[10px] border border-yellow-700/40 px-4 py-2 hover:bg-yellow-600 hover:text-black transition-all font-black uppercase">Changer Rang</button>
+                        {data.allUsers?.filter(u => u.pseudo.toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
+                            // MODIF : flex-col sur mobile pour empiler pseudo et bouton
+                            <div key={u.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-900/50 border border-stone-800 gap-3">
+                                <div>
+                                    <p className="font-bold text-viking-parchment text-lg">{u.pseudo}</p>
+                                    <p className="text-[10px] text-stone-500 mt-1">{u.roles.join(' | ')}</p>
                                 </div>
-                            ))}
-                        </div>
+                                <button onClick={() => handlePromote(u.id)} className="w-full sm:w-auto text-xs border border-viking-gold/40 px-4 py-2 hover:bg-viking-gold hover:text-black transition uppercase font-black rounded">
+                                    Changer Rang
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 )}
 
                 {/* ONGLET ARTICLES */}
                 {activeTab === 'articles' && (
-                    <div className="grid gap-3 animate-in fade-in duration-500">
-                        {data.managementArticles?.map(art => (
-                            <div key={art.id} className="p-5 bg-stone-900/80 border border-stone-800 flex justify-between items-center rounded">
-                                <div>
-                                    <span className="text-lg font-semibold text-stone-200">{art.title}</span>
-                                    <p className="text-xs text-stone-500 italic mt-1 font-serif">dicté par {art.author}</p>
-                                </div>
-                                <span className="text-stone-600 text-xs font-mono bg-black/30 px-2 py-1 rounded">{art.createdAt}</span>
+                    <div className="animate-fadeIn">
+                        
+                        {editingId ? (
+                            <div className="bg-stone-900 p-4 border border-viking-gold">
+                                <button 
+                                    onClick={() => setEditingId(null)}
+                                    className="mb-4 text-stone-500 hover:text-white uppercase text-xs font-bold tracking-widest flex items-center gap-2"
+                                >
+                                    <span>←</span> Annuler la modification
+                                </button>
+                                <ArticleForm id={editingId} onSuccess={handleEditSuccess} />
                             </div>
-                        ))}
+                        ) : (
+                            <div className="grid gap-3">
+                                {data.managementArticles?.map(art => (
+                                    // MODIF : flex-col sur mobile pour empiler titre et boutons
+                                    <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:border-stone-600 transition-colors group gap-4">
+                                        
+                                        <div className="flex-1 w-full">
+                                            <Link 
+                                                to={`/article/${art.id}`} 
+                                                className="font-bold text-viking-parchment group-hover:text-viking-gold transition-colors text-lg block truncate"
+                                            >
+                                                {art.title}
+                                            </Link>
+                                            <div className="text-stone-500 text-xs mt-1">
+                                                Par <span className="text-stone-400">{art.author}</span> • {new Date(art.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* MODIF : w-full sur mobile, boutons en pleine largeur */}
+                                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                                            <button 
+                                                onClick={() => setEditingId(art.id)}
+                                                className="flex-1 sm:flex-none px-3 py-3 sm:py-2 bg-stone-800 text-stone-300 border border-stone-600 hover:border-viking-gold hover:text-white text-[10px] uppercase font-bold tracking-widest transition text-center rounded"
+                                            >
+                                                Modifier
+                                            </button>
+
+                                            <button 
+                                                onClick={() => handleDeleteArticle(art.id)}
+                                                className="flex-1 sm:flex-none px-3 py-3 sm:py-2 bg-red-900/20 text-red-500 border border-red-900/50 hover:bg-red-900 hover:text-white text-[10px] uppercase font-bold tracking-widest transition text-center rounded"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {(!data.managementArticles || data.managementArticles.length === 0) && (
+                                    <p className="text-stone-500 italic text-center py-10">Aucune chronique à gérer.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

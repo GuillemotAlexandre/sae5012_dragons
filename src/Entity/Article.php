@@ -26,23 +26,31 @@ use ApiPlatform\Metadata\Put;
         'groups' => ['article:read'],
         'enable_max_depth' => true // 👈 Ajoute cette ligne
     ],
-    operations: [
-        // 1. Lecture PUBLIQUE (Important pour le visiteur et l'abonné)
-        new Get(
-            security: "is_granted('PUBLIC_ACCESS')" 
-        ),
-        new GetCollection(
-            security: "is_granted('PUBLIC_ACCESS')"
-        ),
 
-        // 2. Écriture RESTREINTE
+    denormalizationContext: ['groups' => ['article:write']],
+    operations: [
+        // 1. Lecture (Pas de changement)
+        new Get(security: "is_granted('PUBLIC_ACCESS')"),
+        new GetCollection(security: "is_granted('PUBLIC_ACCESS')"),
+
+        // 2. Création (Pas de changement)
         new Post(
             security: "is_granted('ROLE_AUTEUR')", 
             processor: ArticleProcessor::class
         ),
-        new Put(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
-        new Patch(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
-        new Delete(security: "is_granted('ROLE_AUTEUR') and object.getAuthor() == user"),
+
+        // 👇 3. MODIFICATION : On autorise l'auteur OU les Éditeurs (Admins inclus)
+        new Put(
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+        ),
+        new Patch(
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+        ),
+        
+        // 👇 4. SUPPRESSION : Idem
+        new Delete(
+            security: "is_granted('ROLE_EDITEUR') or (is_granted('ROLE_AUTEUR') and object.getAuthor() == user)"
+        ),
     ]
 )]
 #[ApiFilter(OrderFilter::class, properties: ['createdAt', 'averageRating'])]
@@ -54,11 +62,13 @@ class Article
     #[Groups(['article:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['article:read', 'article:write'])]
+   #[ORM\Column(type: 'string', length: 255)]
+    // 👇 INDISPENSABLE : article:write
+    #[Groups(['article:read', 'article:write'])] 
     private ?string $title = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+   #[ORM\Column(type: 'text', nullable: true)]
+    // 👇 INDISPENSABLE : article:write
     #[Groups(['article:read', 'article:write'])]
     private ?string $summary = null;
 
@@ -71,7 +81,8 @@ class Article
     private ?array $designConfig = null;
 
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Bloc::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[Groups(['article:read', 'article:write'])]
+    // 👇 INDISPENSABLE : article:write (pour modifier la liste des blocs)
+    #[Groups(['article:read', 'article:write'])] 
     private Collection $blocs;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]

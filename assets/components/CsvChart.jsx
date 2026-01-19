@@ -5,7 +5,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell 
 } from 'recharts';
 
-const COLORS = ['#d4af37', '#b91c1c', '#1c1917', '#57534e', '#a8a29e']; // Couleurs Viking (Or, Rouge, Noir...)
+const COLORS = ['#d4af37', '#b91c1c', '#1c1917', '#57534e', '#a8a29e']; // Couleurs Viking
 
 const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
     const [data, setData] = useState([]);
@@ -16,17 +16,15 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
         if (!csvUrl) return;
 
         setLoading(true);
-        // 1. On va chercher le fichier CSV via son URL
         fetch(csvUrl)
             .then(response => {
                 if (!response.ok) throw new Error("Impossible de lire le parchemin de données");
                 return response.text();
             })
             .then(csvText => {
-                // 2. On le transforme en JSON utilisable
                 Papa.parse(csvText, {
-                    header: true, // La première ligne contient les titres
-                    dynamicTyping: true, // Convertit les "10" en nombres 10
+                    header: true,
+                    dynamicTyping: true,
                     skipEmptyLines: true,
                     complete: (results) => {
                         setData(results.data);
@@ -44,27 +42,29 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
             });
     }, [csvUrl]);
 
-    if (!csvUrl) return <p className="text-stone-500 italic text-xs">Aucune donnée sélectionnée.</p>;
-    if (loading) return <p className="text-viking-gold animate-pulse text-xs">Déchiffrage des runes...</p>;
-    if (error) return <p className="text-red-500 text-xs">Erreur : {error}</p>;
-    if (data.length === 0) return <p className="text-stone-500 text-xs">Le fichier est vide.</p>;
+    if (!csvUrl) return <p className="text-stone-500 italic text-xs text-center p-4">Aucune donnée sélectionnée.</p>;
+    if (loading) return <div className="flex justify-center items-center h-full"><p className="text-viking-gold animate-pulse text-xs">Déchiffrage des runes...</p></div>;
+    if (error) return <p className="text-red-500 text-xs text-center p-4">Erreur : {error}</p>;
+    if (data.length === 0) return <p className="text-stone-500 text-xs text-center p-4">Le fichier est vide.</p>;
 
-    // On devine les clés (X = première colonne, Y = deuxième colonne)
     const keys = Object.keys(data[0]);
-    const xKey = keys[0]; // Ex: "Année" ou "Dragon"
-    const yKey = keys[1]; // Ex: "Population" ou "Vitesse"
+    const xKey = keys[0];
+    const yKey = keys[1];
+
+    // MODIF : Style commun pour les axes (police plus petite)
+    const axisStyle = { fontSize: '10px', fill: '#a8a29e' };
 
     const renderChart = () => {
         switch (vizType) {
             case 'line':
                 return (
-                    <LineChart data={data}>
+                    <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                        <XAxis dataKey={xKey} stroke="#d4af37" />
-                        <YAxis stroke="#d4af37" />
-                        <Tooltip contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff' }} />
-                        <Legend />
-                        <Line type="monotone" dataKey={yKey} stroke="#d4af37" strokeWidth={3} dot={{ r: 6 }} activeDot={{ r: 8 }} />
+                        <XAxis dataKey={xKey} stroke="#d4af37" tick={axisStyle} />
+                        <YAxis stroke="#d4af37" tick={axisStyle} />
+                        <Tooltip contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff', fontSize: '12px' }} />
+                        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                        <Line type="monotone" dataKey={yKey} stroke="#d4af37" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     </LineChart>
                 );
             case 'pie':
@@ -75,8 +75,9 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
+                            // MODIF : Label simplifié pour mobile
+                            label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                            outerRadius="70%" 
                             fill="#8884d8"
                             dataKey={yKey}
                             nameKey={xKey}
@@ -85,18 +86,19 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff' }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff', fontSize: '12px' }} />
+                        <Legend wrapperStyle={{ fontSize: '10px' }} layout="horizontal" verticalAlign="bottom" align="center" />
                     </PieChart>
                 );
             case 'bar':
             default:
                 return (
-                    <BarChart data={data}>
+                    <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                        <XAxis dataKey={xKey} stroke="#d4af37" />
-                        <YAxis stroke="#d4af37" />
-                        <Tooltip cursor={{fill: '#333'}} contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff' }} />
-                        <Legend />
+                        <XAxis dataKey={xKey} stroke="#d4af37" tick={axisStyle} />
+                        <YAxis stroke="#d4af37" tick={axisStyle} />
+                        <Tooltip cursor={{fill: '#333'}} contentStyle={{ backgroundColor: '#1c1917', borderColor: '#d4af37', color: '#fff', fontSize: '12px' }} />
+                        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                         <Bar dataKey={yKey} fill="#d4af37" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 );
@@ -104,7 +106,9 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
     };
 
     return (
-        <div className="h-64 w-full mt-4 bg-black/40 p-4 border border-stone-800 rounded">
+        // MODIF : h-full et w-full pour prendre tout l'espace disponible du parent
+        // Le padding est géré par le parent (ArticleForm/Show)
+        <div className="w-full h-full min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
                 {renderChart()}
             </ResponsiveContainer>

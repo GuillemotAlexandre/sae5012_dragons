@@ -45,14 +45,13 @@ const DataProviderSpace = ({ datasets }) => {
         setIsUploading(true);
         const token = localStorage.getItem('token');
 
-        // Préparation du payload conforme à API Platform
         const payload = {
             name: datasetName,
             source: file.name,
             metadata: {
                 columns: columnMapping,
                 uploadedAt: new Date().toISOString(),
-                rowCount: preview.length // Information utile pour ton affichage
+                rowCount: preview.length
             }
         };
 
@@ -61,7 +60,6 @@ const DataProviderSpace = ({ datasets }) => {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    // Changement crucial ici pour éviter l'erreur 415
                     'Content-Type': 'application/ld+json',
                     'Accept': 'application/ld+json'
                 },
@@ -84,11 +82,17 @@ const DataProviderSpace = ({ datasets }) => {
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        // MODIF : space-y-4 sur mobile pour compacter
+        <div className="space-y-4 md:space-y-6 animate-fadeIn">
+            
             {/* Formulaire d'importation */}
-            <div className="bg-black/40 p-6 border border-viking-gold/30 rounded-lg shadow-xl">
-                <h3 className="text-viking-gold font-dragon text-xl mb-4 uppercase tracking-widest">Nouvelle Archive de Données</h3>
-                <div className="flex flex-col md:flex-row gap-6 items-center">
+            {/* MODIF : p-4 sur mobile */}
+            <div className="bg-black/40 p-4 md:p-6 border border-viking-gold/30 rounded-lg shadow-xl">
+                <h3 className="text-viking-gold font-dragon text-lg md:text-xl mb-4 uppercase tracking-widest text-center md:text-left">
+                    Nouvelle Archive de Données
+                </h3>
+                
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
                     <div className="w-full">
                         <label className="block text-stone-500 text-[10px] uppercase font-black mb-2">Fichier CSV uniquement</label>
                         <input 
@@ -97,10 +101,10 @@ const DataProviderSpace = ({ datasets }) => {
                         />
                     </div>
                     {file && (
-                        <div className="w-full md:w-auto pt-6">
+                        <div className="w-full md:w-auto pt-2 md:pt-6">
                             <button 
                                 onClick={handleUpload} disabled={isUploading}
-                                className="w-full bg-viking-fire text-white py-3 px-8 font-black uppercase text-xs shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+                                className="w-full md:w-auto bg-viking-fire text-white py-3 px-8 font-black uppercase text-xs shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale rounded"
                             >
                                 {isUploading ? 'Gravure...' : 'Sceller l\'Archive'}
                             </button>
@@ -115,16 +119,18 @@ const DataProviderSpace = ({ datasets }) => {
                     <div className="bg-black/40 p-3 border-b border-white/5">
                         <span className="text-[10px] font-black uppercase text-viking-gold/50">Analyse de la structure</span>
                     </div>
+                    {/* Le scroll horizontal est géré ici par overflow-x-auto */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-black/60">
                                     {headers.map(h => (
-                                        <th key={h} className="p-4 border-r border-white/5 min-w-[150px]">
-                                            <div className="text-viking-parchment text-xs font-bold mb-3 truncate">{h}</div>
+                                        // MODIF : min-w pour forcer la largeur et activer le scroll
+                                        <th key={h} className="p-3 md:p-4 border-r border-white/5 min-w-[140px] align-top">
+                                            <div className="text-viking-parchment text-xs font-bold mb-2 truncate" title={h}>{h}</div>
                                             <button 
                                                 onClick={() => toggleType(h)}
-                                                className={`text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tighter transition-colors ${columnMapping[h] === 'numerical' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'}`}
+                                                className={`text-[9px] w-full px-2 py-1 rounded-full font-black uppercase tracking-tighter transition-colors border ${columnMapping[h] === 'numerical' ? 'bg-blue-600/20 text-blue-400 border-blue-500/30' : 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30'}`}
                                             >
                                                 {columnMapping[h] === 'numerical' ? '🔢 Numérique' : '🔤 Catégoriel'}
                                             </button>
@@ -136,7 +142,10 @@ const DataProviderSpace = ({ datasets }) => {
                                 {preview.map((row, i) => (
                                     <tr key={i} className="border-t border-white/5 hover:bg-white/5 transition-colors">
                                         {headers.map(h => (
-                                            <td key={h} className="p-4 text-[11px] text-stone-400 border-r border-white/5 italic">{row[h]}</td>
+                                            // MODIF : whitespace-nowrap pour éviter les retours à la ligne moches dans les cellules
+                                            <td key={h} className="p-3 md:p-4 text-[10px] md:text-[11px] text-stone-400 border-r border-white/5 italic whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis">
+                                                {row[h]}
+                                            </td>
                                         ))}
                                     </tr>
                                 ))}
@@ -147,19 +156,22 @@ const DataProviderSpace = ({ datasets }) => {
             )}
 
             {/* Archives existantes */}
-            <div className="mt-12">
-                <h3 className="text-viking-gold/40 font-dragon text-sm mb-6 uppercase tracking-widest border-b border-viking-gold/20 pb-2">Registres déjà présents</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="mt-8 md:mt-12">
+                <h3 className="text-viking-gold/40 font-dragon text-sm mb-4 md:mb-6 uppercase tracking-widest border-b border-viking-gold/20 pb-2">Registres déjà présents</h3>
+                
+                {/* MODIF : grid responsive 1 -> 2 -> 3 colonnes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {datasets?.length > 0 ? datasets.map(ds => (
-                        <div key={ds.id} className="p-4 bg-black/20 border border-stone-800 hover:border-viking-gold/40 transition-all group">
-                            <div className="text-viking-parchment font-bold text-sm group-hover:text-viking-gold transition-colors">{ds.name}</div>
+                        <div key={ds.id} className="p-4 bg-black/20 border border-stone-800 hover:border-viking-gold/40 transition-all group rounded">
+                            <div className="text-viking-parchment font-bold text-sm group-hover:text-viking-gold transition-colors truncate" title={ds.name}>{ds.name}</div>
+                            
                             <div className="flex justify-between items-center mt-2">
-                                <span className="text-[9px] text-stone-600 uppercase font-bold italic">{ds.source}</span>
-                                <span className="text-[9px] bg-stone-800 px-2 py-0.5 rounded text-stone-400">{ds.rowsCount} lignes</span>
+                                <span className="text-[9px] text-stone-600 uppercase font-bold italic truncate max-w-[60%]" title={ds.source}>{ds.source}</span>
+                                <span className="text-[9px] bg-stone-800 px-2 py-0.5 rounded text-stone-400 whitespace-nowrap">{ds.rowsCount} lignes</span>
                             </div>
                         </div>
                     )) : (
-                        <div className="col-span-full py-10 text-center border-2 border-dashed border-stone-800 text-stone-600 text-xs uppercase font-black">
+                        <div className="col-span-full py-10 text-center border-2 border-dashed border-stone-800 text-stone-600 text-xs uppercase font-black rounded">
                             Aucune donnée n'a été gravée pour le moment.
                         </div>
                     )}
