@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import DataProviderSpace from '../components/DataProviderSpace'; // On l'importera juste après
 import { Link } from 'react-router-dom';
+import ArticleForm from '../components/ArticleForm';
 
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('stats'); // Système d'onglets
+    const [editingId, setEditingId] = useState(null);
 
     const token = localStorage.getItem('token');
     let currentUser = null;
@@ -42,6 +44,36 @@ const AdminDashboard = () => {
     useEffect(() => {
         loadStats();
     }, []);
+
+
+    const handleDeleteArticle = async (id) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir brûler ce parchemin définitivement ?")) return;
+
+        try {
+            const res = await fetch(`/api/articles/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                // On met à jour l'affichage localement sans recharger toute la page
+                setData(prev => ({
+                    ...prev,
+                    managementArticles: prev.managementArticles.filter(art => art.id !== id)
+                }));
+            } else {
+                alert("Erreur : Impossible de supprimer (Droits insuffisants ?)");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erreur serveur.");
+        }
+    };
+
+    const handleEditSuccess = () => {
+        setEditingId(null); // On quitte le mode édition
+        loadStats(); // On recharge les données pour voir les changements (titre, etc.)
+    }
 
     const handlePromote = async (userId) => {
         try {
@@ -128,32 +160,64 @@ const AdminDashboard = () => {
                 )}
 
                 {activeTab === 'articles' && (
-                    <div className="grid gap-2 animate-fadeIn">
-                        {data.managementArticles?.map(art => (
-                            <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex justify-between items-center hover:border-viking-gold transition-colors group">
-                                <div>
-                                    {/* 👇 LE LIEN CLIQUABLE EST ICI */}
-                                    <Link 
-                                        to={`/article/${art.id}`} 
-                                        className="font-bold text-viking-parchment group-hover:text-viking-gold transition-colors text-lg"
-                                    >
-                                        {art.title}
-                                    </Link>
-                                    <span className="text-stone-500 ml-2 text-sm">par {art.author}</span>
-                                </div>
-                                
-                                <div className="flex items-center gap-4">
-                                    <span className="text-stone-600 text-xs">{art.createdAt}</span>
-                                    {/* Petit bouton "Voir" optionnel pour être explicite */}
-                                    <Link 
-                                        to={`/article/${art.id}`}
-                                        className="text-[10px] uppercase border border-stone-600 px-2 py-1 text-stone-400 group-hover:border-viking-gold group-hover:text-viking-gold transition"
-                                    >
-                                        Voir →
-                                    </Link>
-                                </div>
+                    <div className="animate-fadeIn">
+                        
+                        {/* CAS 1 : MODE ÉDITION ACTIF */}
+                        {editingId ? (
+                            <div className="bg-stone-900 p-4 border border-viking-gold">
+                                <button 
+                                    onClick={() => setEditingId(null)}
+                                    className="mb-4 text-stone-500 hover:text-white uppercase text-xs font-bold tracking-widest"
+                                >
+                                    ← Annuler la modification
+                                </button>
+                                {/* On réutilise ton super formulaire */}
+                                <ArticleForm id={editingId} onSuccess={handleEditSuccess} />
                             </div>
-                        ))}
+                        ) : (
+                            /* CAS 2 : LISTE DES ARTICLES */
+                            <div className="grid gap-2">
+                                {data.managementArticles?.map(art => (
+                                    <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex justify-between items-center hover:border-stone-600 transition-colors group">
+                                        
+                                        <div className="flex-1">
+                                            <Link 
+                                                to={`/article/${art.id}`} 
+                                                className="font-bold text-viking-parchment group-hover:text-viking-gold transition-colors text-lg"
+                                            >
+                                                {art.title}
+                                            </Link>
+                                            <div className="text-stone-500 text-xs mt-1">
+                                                Par <span className="text-stone-400">{art.author}</span> • Le {new Date(art.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* 👇 LES NOUVEAUX BOUTONS D'ACTION */}
+                                        <div className="flex items-center gap-3 ml-4">
+                                            {/* BOUTON MODIFIER */}
+                                            <button 
+                                                onClick={() => setEditingId(art.id)}
+                                                className="px-3 py-2 bg-stone-800 text-stone-300 border border-stone-600 hover:border-viking-gold hover:text-white text-[10px] uppercase font-bold tracking-widest transition"
+                                            >
+                                                Modifier
+                                            </button>
+
+                                            {/* BOUTON SUPPRIMER */}
+                                            <button 
+                                                onClick={() => handleDeleteArticle(art.id)}
+                                                className="px-3 py-2 bg-red-900/20 text-red-500 border border-red-900/50 hover:bg-red-900 hover:text-white text-[10px] uppercase font-bold tracking-widest transition"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {(!data.managementArticles || data.managementArticles.length === 0) && (
+                                    <p className="text-stone-500 italic text-center">Aucune chronique à gérer.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
