@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Annotation\Groups; // Import important
     operations: [
         new Get(normalizationContext: ['groups' => ['dataset:read']]),
         new GetCollection(normalizationContext: ['groups' => ['dataset:read']]),
-        
+
         // On définit les groupes de lecture (read) et d'écriture (write)
         new Post(
             security: "is_granted('ROLE_FOURNISSEUR')",
@@ -62,17 +62,44 @@ class Dataset
         $this->visualisations = new ArrayCollection();
     }
 
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-    public function getName(): ?string { return $this->name; }
-    public function setName(string $name): self { $this->name = $name; return $this; }
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
 
-    public function getSource(): ?string { return $this->source; }
-    public function setSource(string $source): self { $this->source = $source; return $this; }
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+    public function setSource(string $source): self
+    {
+        $this->source = $source;
+        return $this;
+    }
 
-    public function getMetadata(): array { return $this->metadata; }
-    public function setMetadata(?array $metadata): self { $this->metadata = $metadata ?? []; return $this; }
+    public function getMetadata(): array
+    {
+        return $this->metadata;
+    }
+    public function setMetadata(?array $metadata): self
+    {
+        $this->metadata = $metadata ?? [];
+        return $this;
+    }
 
     /** @return Collection<int, Visualisation> */
-    public function getVisualisations(): Collection { return $this->visualisations; }
+    public function getVisualisations(): Collection
+    {
+        return $this->visualisations;
+    }
 }
