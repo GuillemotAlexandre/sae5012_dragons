@@ -20,8 +20,8 @@ Suivez ces étapes scrupuleusement pour installer le projet sur votre machine (W
 ### 1. Récupération du projet
 Clonez la branche finale du projet :
 
-```bash
-git clone -b branche-Alex [https://github.com/GuillemotAlexandre/sae5012_dragons.git](https://github.com/GuillemotAlexandre/sae5012_dragons.git)
+
+git clone -b new-backup-raph [https://github.com/GuillemotAlexandre/sae5012_dragons.git](https://github.com/GuillemotAlexandre/sae5012_dragons.git)
 cd sae5012_dragons
 
 # 1. Installer les paquets PHP
