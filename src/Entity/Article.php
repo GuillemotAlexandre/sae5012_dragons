@@ -76,6 +76,10 @@ class Article
     #[Groups(['article:read', 'article:write'])]
     private ?string $music = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['article:read', 'article:write'])]
+    private ?array $designConfig = null;
+
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Bloc::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     // 👇 INDISPENSABLE : article:write (pour modifier la liste des blocs)
     #[Groups(['article:read', 'article:write'])] 
@@ -83,7 +87,7 @@ class Article
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Groups(['article:read'])] // L'auteur est défini automatiquement ou via le write
+    #[Groups(['article:read'])]
     private ?User $author = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -134,6 +138,17 @@ class Article
     public function setSummary(?string $summary): self
     {
         $this->summary = $summary;
+        return $this;
+    }
+
+    public function getDesignConfig(): ?array
+    {
+        return $this->designConfig;
+    }
+
+    public function setDesignConfig(?array $designConfig): self
+    {
+        $this->designConfig = $designConfig;
         return $this;
     }
 

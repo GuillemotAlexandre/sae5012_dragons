@@ -13,10 +13,8 @@ const CommentItem = ({ comment, onVote, onReply, articleId, canInteract }) => {
     };
 
     return (
-        // MODIF : pl-2 ou pl-4 selon l'écran pour gagner de la place en profondeur
         <div className="border-l-2 border-stone-700 pl-3 md:pl-4 mt-4 mb-2">
-            {/* EN-TÊTE : Auteur + Score */}
-            {/* MODIF : flex-wrap pour que ça passe à la ligne sur très petit écran */}
+
             <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs text-stone-400 mb-1">
                 <span className="font-bold text-viking-gold text-sm md:text-base">
                     {comment.author?.pseudo || "Viking Anonyme"}
@@ -27,12 +25,12 @@ const CommentItem = ({ comment, onVote, onReply, articleId, canInteract }) => {
                 </span>
             </div>
 
-            {/* CONTENU */}
+
             <p className="text-stone-200 text-sm md:text-base mb-2 break-words">
                 {comment.content}
             </p>
 
-            {/* 🔒 ACTIONS : Vote & Répondre */}
+ 
             {canInteract && (
                 <div className="flex items-center gap-4 text-[10px] md:text-xs font-bold uppercase text-stone-500 select-none">
                     <div className="flex gap-3 md:gap-1">
@@ -58,9 +56,9 @@ const CommentItem = ({ comment, onVote, onReply, articleId, canInteract }) => {
                 </div>
             )}
 
-            {/* FORMULAIRE DE RÉPONSE */}
+
             {showReplyForm && canInteract && (
-                // MODIF : flex-col sur mobile pour bouton large
+
                 <form
                     onSubmit={handleReplySubmit}
                     className="mt-2 flex flex-col md:flex-row gap-2"
@@ -82,7 +80,7 @@ const CommentItem = ({ comment, onVote, onReply, articleId, canInteract }) => {
                 </form>
             )}
 
-            {/* RÉCURSIVITÉ */}
+
             {comment.replies && comment.replies.length > 0 && (
                 <div className="mt-2">
                     {comment.replies.map((reply) => (
@@ -101,7 +99,7 @@ const CommentItem = ({ comment, onVote, onReply, articleId, canInteract }) => {
     );
 };
 
-// Composant Principal
+
 const CommentSection = ({ articleId }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
@@ -196,9 +194,9 @@ const CommentSection = ({ articleId }) => {
                 Conseil de Guerre ({comments.length} avis)
             </h3>
 
-            {/* 🔒 Formulaire Principal */}
+
             {canInteract ? (
-                // MODIF : flex-col sur mobile pour que le bouton prenne toute la largeur
+
                 <div className="mb-8 flex flex-col md:flex-row gap-2">
                     <textarea
                         value={newComment}
@@ -208,7 +206,7 @@ const CommentSection = ({ articleId }) => {
                     />
                     <button
                         onClick={() => handlePost(newComment)}
-                        // MODIF : w-full sur mobile
+
                         className="bg-viking-gold text-black font-bold px-6 py-3 md:py-0 uppercase hover:bg-white transition w-full md:w-auto shadow-lg active:scale-95"
                     >
                         Graver
@@ -221,7 +219,6 @@ const CommentSection = ({ articleId }) => {
                 </div>
             )}
 
-            {/* Liste des commentaires */}
             <div className="space-y-4 md:space-y-6">
                 {comments.map((comment) => (
                     <CommentItem

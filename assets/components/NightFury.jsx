@@ -111,7 +111,6 @@ const NightFuryScene = () => {
         </Suspense>
       </Canvas>
 
-      {/* 🎛️ BOUTON TOGGLE (Mobile uniquement) */}
       <button 
         onClick={() => setControlsVisible(!controlsVisible)}
         className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur text-viking-gold p-3 rounded-full border border-viking-gold/30 md:hidden shadow-lg active:scale-95 transition-transform"
@@ -119,11 +118,6 @@ const NightFuryScene = () => {
         {controlsVisible ? '✕' : '⚙️'}
       </button>
 
-      {/* 🎛️ UI PANNEAU DE CONTRÔLE */}
-      {/* MODIF ERGONOMIQUE : 
-          - Mobile : "bottom-0 w-full rounded-t-2xl" (glisse du bas)
-          - Desktop : "top-4 right-4 w-64 rounded-xl" (flotte en haut à droite)
-      */}
       <div className={`
         absolute z-10 bg-black/80 backdrop-blur-md text-white border border-blue-500/30 shadow-2xl transition-all duration-300 ease-in-out
         
@@ -140,7 +134,6 @@ const NightFuryScene = () => {
             <h3 className="text-blue-300 font-bold text-sm uppercase tracking-wider">
                 Paramètres
             </h3>
-            {/* Bouton reset discret */}
             <button 
                 onClick={handleReset}
                 className="text-[10px] text-stone-400 hover:text-white uppercase font-bold underline decoration-dotted"
@@ -149,9 +142,8 @@ const NightFuryScene = () => {
             </button>
         </div>
 
-        {/* CONTROLES COMPACTS */}
         <div className="space-y-4">
-            {/* 1. Taille */}
+
             <div>
                 <div className="flex justify-between text-xs mb-1 text-stone-300">
                     <span>Taille</span>

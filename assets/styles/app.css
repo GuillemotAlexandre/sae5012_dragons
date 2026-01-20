@@ -1,14 +1,47 @@
-body {
-    background-color: skyblue;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@layer base {
+    :root {
+        /* Variables Globales */
+        --viking-orange: #e67e22;
+        --viking-bg: #87CEEB; 
+        
+        /* Variable spécifique pour les titres d'articles */
+        --article-title-color: #ffffff;
+    }
 
-/* Animation des barres de son */
-@keyframes equalizer {
-  0% { height: 10%; }
-  50% { height: 100%; }
-  100% { height: 10%; }
-}
-.animate-bar {
-  animation: equalizer 1s infinite ease-in-out;
+    body {
+        background-color: var(--viking-bg);
+        @apply min-h-screen text-white transition-colors duration-300;
+        margin: 0;
+    }
+
+    /* MODIFICATION ICI : On enlève le !important du h1 global */
+    .font-dragon, .navbar-brand {
+        color: var(--viking-orange) !important;
+    }
+
+    /* Le h1 devient flexible : orange par défaut, mais modifiable par React */
+    h1 {
+        color: var(--viking-orange);
+    }
+
+    /* --- Classe pour le titre des articles --- */
+    .article-dynamic-title {
+        /* On utilise !important ici pour être sûr de gagner contre le h1 global */
+        color: var(--article-title-color, #ffffff) !important;
+        transition: color 0.3s ease;
+    }
+
+    /* Animation des barres de son */
+    @keyframes equalizer {
+      0% { height: 10%; }
+      50% { height: 100%; }
+      100% { height: 10%; }
+    }
+    .animate-bar {
+      animation: equalizer 1s infinite ease-in-out;
+    }
 }

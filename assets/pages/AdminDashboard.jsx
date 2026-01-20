@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import DataProviderSpace from '../components/DataProviderSpace';
 import { Link } from 'react-router-dom';
 import ArticleForm from '../components/ArticleForm';
+import DesignerSpace from '../components/DesignerSpace'; // Ensure this path is correct!
 
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
@@ -13,6 +14,7 @@ const AdminDashboard = () => {
 
     const token = localStorage.getItem('token');
     let currentUser = null;
+    
     try {
         currentUser = token ? jwtDecode(token) : null;
     } catch (e) {
@@ -87,22 +89,21 @@ const AdminDashboard = () => {
                     )
                 });
             }
-        } catch (err) { alert("Erreur lors du changement de rang"); }
+        } catch (err) { 
+            alert("Erreur lors du changement de rang"); 
+        }
     };
 
-    if (error) return <div className="text-viking-fire p-10 text-center font-dragon">{error}</div>;
-    if (!data) return <div className="text-viking-gold p-10 font-dragon animate-pulse text-center">Appel au Grand Conseil...</div>;
+    if (error) return <div className="text-red-500 p-10 text-center font-dragon">{error}</div>;
+    if (!data) return <div className="text-yellow-500 p-10 font-dragon animate-pulse text-center">Appel au Grand Conseil...</div>;
 
     return (
-        // MODIF : p-4 sur mobile, p-6 sur desktop
         <div className="max-w-6xl mx-auto p-4 md:p-6 text-white pb-20">
-            {/* MODIF : Taille du titre réduite sur mobile */}
             <h1 className="text-3xl md:text-5xl font-dragon text-viking-parchment mb-6 md:mb-10 border-b border-viking-gold/30 pb-4 uppercase text-center md:text-left">
                 Palais d'Administration
             </h1>
 
             {/* Navigation par Onglets responsive */}
-            {/* MODIF : flex-wrap permet aux boutons de passer à la ligne sur mobile */}
             <div className="flex flex-wrap gap-2 mb-8 border-b border-stone-800 pb-4 justify-center md:justify-start">
                 <button onClick={() => setActiveTab('stats')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'stats' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Vue d'ensemble</button>
                 
@@ -124,23 +125,25 @@ const AdminDashboard = () => {
             </div>
 
             {/* CONTENU DYNAMIQUE */}
-            <div className="min-h-[400px]">
+            <div className="min-h-[500px]">
                 
+                {/* ONGLET STATS */}
                 {activeTab === 'stats' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
-                        <div className="bg-stone-900 border-l-4 border-viking-gold p-6 shadow-xl">
-                            <h2 className="text-stone-500 uppercase text-xs font-black">Habitants</h2>
-                            <p className="text-4xl font-dragon mt-2 text-white">{data.usersCount}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
+                        <div className="bg-stone-900 border-l-4 border-yellow-600 p-8 shadow-2xl rounded-r-lg">
+                            <h2 className="text-stone-500 uppercase text-xs font-black tracking-widest">Guerriers de Berk</h2>
+                            <p className="text-5xl font-dragon mt-2 text-white">{data.usersCount}</p>
                         </div>
-                        <div className="bg-stone-900 border-l-4 border-viking-fire p-6 shadow-xl">
-                            <h2 className="text-stone-500 uppercase text-xs font-black">Articles</h2>
-                            <p className="text-4xl font-dragon mt-2 text-white">{data.articlesCount}</p>
+                        <div className="bg-stone-900 border-l-4 border-orange-700 p-8 shadow-2xl rounded-r-lg">
+                            <h2 className="text-stone-500 uppercase text-xs font-black tracking-widest">Chroniques écrites</h2>
+                            <p className="text-5xl font-dragon mt-2 text-white">{data.articlesCount}</p>
                         </div>
                     </div>
                 )}
 
+                {/* ONGLET USERS */}
                 {activeTab === 'users' && isFullAdmin && (
-                    <div className="space-y-4 animate-fadeIn">
+                    <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
                         <input 
                             type="text" 
                             placeholder="Chercher un guerrier..." 
@@ -148,7 +151,6 @@ const AdminDashboard = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         {data.allUsers?.filter(u => u.pseudo.toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
-                            // MODIF : flex-col sur mobile pour empiler pseudo et bouton
                             <div key={u.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-900/50 border border-stone-800 gap-3">
                                 <div>
                                     <p className="font-bold text-viking-parchment text-lg">{u.pseudo}</p>
@@ -162,6 +164,7 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
+                {/* ONGLET ARTICLES */}
                 {activeTab === 'articles' && (
                     <div className="animate-fadeIn">
                         
@@ -178,7 +181,6 @@ const AdminDashboard = () => {
                         ) : (
                             <div className="grid gap-3">
                                 {data.managementArticles?.map(art => (
-                                    // MODIF : flex-col sur mobile pour empiler titre et boutons
                                     <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:border-stone-600 transition-colors group gap-4">
                                         
                                         <div className="flex-1 w-full">
@@ -193,7 +195,6 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
                                         
-                                        {/* MODIF : w-full sur mobile, boutons en pleine largeur */}
                                         <div className="flex items-center gap-3 w-full sm:w-auto">
                                             <button 
                                                 onClick={() => setEditingId(art.id)}
@@ -220,13 +221,17 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
+                {/* ONGLET DATA */}
                 {activeTab === 'data' && isProvider && (
-                    <DataProviderSpace datasets={data.datasets} />
+                    <div className="animate-in zoom-in-95 duration-500">
+                        <DataProviderSpace datasets={data.datasets} />
+                    </div>
                 )}
 
+                {/* ONGLET DESIGN */}
                 {activeTab === 'design' && isDesigner && (
-                    <div className="p-10 text-center border-2 border-dashed border-stone-800 text-stone-600 uppercase font-black text-sm">
-                        Forge de Design (En construction)
+                    <div className="animate-in fade-in duration-700">
+                        <DesignerSpace/>
                     </div>
                 )}
             </div>

@@ -37,7 +37,6 @@ const ArticleShow = () => {
             </div>
         );
 
-    // --- LOGIQUE D'EXTRACTION ---
     let customStyles = {};
     const rawConfig = article.designConfig;
 
@@ -52,8 +51,6 @@ const ArticleShow = () => {
         }
     }
 
-    // --- DÉFINITION DES COULEURS ---
-    // On utilise les valeurs de la BDD, sinon blanc par défaut (sera géré par la classe CSS)
     const finalTitleColor = customStyles.titleColor || "#ffffff";
     const finalContentBg = customStyles.contentBg || "rgba(41, 37, 36, 0.5)";
 
@@ -86,7 +83,7 @@ const ArticleShow = () => {
             });
             if (res.ok) {
                 alert("Votre note a été gravée !");
-                // Optionnel : Recharger l'article pour voir la nouvelle moyenne
+                
             }
         } catch (err) {
             console.error(err);
@@ -94,11 +91,8 @@ const ArticleShow = () => {
     };
 
     return (
-        // MODIF : p-4 sur mobile, p-8 sur desktop
+        
         <div className="max-w-4xl mx-auto p-4 md:p-8 min-h-screen bg-stone-900 md:border-x border-stone-800 shadow-2xl">
-            
-            {/* EN-TÊTE : Bouton Retour et Notation */}
-            {/* MODIF : flex-col-reverse sur mobile pour mettre le retour en bas ou flex-col classique */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <Link
                     to="/forum"
@@ -107,7 +101,6 @@ const ArticleShow = () => {
                     ← Retour au Hall
                 </Link>
                 
-                {/* MODIF : w-full sur mobile pour centrer la notation */}
                 <div className="flex justify-between md:justify-center items-center gap-4 w-full md:w-auto order-1 md:order-2 bg-stone-800/50 p-3 rounded md:bg-transparent md:p-0">
                     <StarRating
                         articleId={id}
@@ -120,19 +113,18 @@ const ArticleShow = () => {
                 </div>
             </div>
 
-            {/* TITRE */}
+
             <h1
                 style={{ "--article-title-color": finalTitleColor }}
-                // MODIF : text-3xl mobile, break-words pour éviter débordement
+
                 className="article-dynamic-title text-3xl md:text-5xl font-dragon mb-6 text-center uppercase tracking-widest drop-shadow-lg transition-all duration-500 break-words leading-tight"
             >
                 {article.title}
             </h1>
 
-            {/* RÉSUMÉ */}
+
             <div
                 style={{ backgroundColor: finalContentBg }}
-                // MODIF : p-5 sur mobile, text-base
                 className="p-5 md:p-8 border-l-4 border-viking-gold mb-8 italic text-stone-300 text-base md:text-lg leading-relaxed shadow-inner transition-all duration-500 text-justify"
             >
                 {article.summary}
@@ -151,7 +143,6 @@ const ArticleShow = () => {
                             return (
                                 <h2
                                     key={bloc.id}
-                                    // MODIF : text-2xl mobile
                                     className="text-2xl md:text-3xl font-bold text-white border-b border-stone-700 pb-2 mt-8 break-words"
                                 >
                                     {bloc.content}
@@ -161,7 +152,7 @@ const ArticleShow = () => {
                             return (
                                 <p
                                     key={bloc.id}
-                                    // MODIF : text-base mobile
+
                                     className="text-stone-300 leading-relaxed text-base md:text-lg whitespace-pre-line text-justify"
                                 >
                                     {bloc.content}
@@ -176,7 +167,7 @@ const ArticleShow = () => {
                                     <img
                                         src={bloc.content}
                                         alt="Illustration"
-                                        // MODIF : max-w-full pour ne pas dépasser
+
                                         className="mx-auto max-w-full md:max-h-[500px] border-4 border-stone-800 shadow-xl rounded"
                                     />
                                 </figure>
@@ -194,7 +185,7 @@ const ArticleShow = () => {
                                     <h3 className="text-viking-gold font-bold text-xs md:text-sm uppercase mb-4 tracking-widest text-center">
                                         📊 Données du Clan
                                     </h3>
-                                    {/* MODIF : h-64 sur mobile */}
+
                                     <div className="h-64 md:h-96 relative">
                                         <CsvChart
                                             csvUrl={parts[1]}

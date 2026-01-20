@@ -6,24 +6,24 @@ const VikingPlayer = ({ src, autoPlay = false }) => {
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState("0:00");
     const [duration, setDuration] = useState("0:00");
-    const [isBlocked, setIsBlocked] = useState(false); // Nouveau state pour détecter le blocage
+    const [isBlocked, setIsBlocked] = useState(false);
 
-    // Gestion de l'Autoplay
+  
     useEffect(() => {
         if (autoPlay && audioRef.current) {
             const playPromise = audioRef.current.play();
             if (playPromise !== undefined) {
                 playPromise
                     .then(() => {
-                        // Succès : Le navigateur a autorisé l'autoplay
+                       
                         setIsPlaying(true);
                         setIsBlocked(false);
                     })
                     .catch(error => {
-                        // Échec : Le navigateur a bloqué l'autoplay
+                
                         console.log("Autoplay bloqué (interaction requise)");
                         setIsPlaying(false);
-                        setIsBlocked(true); // On signale qu'il faut une action manuelle
+                        setIsBlocked(true); 
                     });
             }
         }
@@ -34,7 +34,7 @@ const VikingPlayer = ({ src, autoPlay = false }) => {
             audioRef.current.pause();
         } else {
             audioRef.current.play();
-            setIsBlocked(false); // Si l'utilisateur clique, le blocage saute
+            setIsBlocked(false); 
         }
         setIsPlaying(!isPlaying);
     };
@@ -79,15 +79,15 @@ const VikingPlayer = ({ src, autoPlay = false }) => {
     ));
 
     return (
-        // MODIF : my-4 sur mobile, my-8 sur desktop, p-4 sur mobile, p-6 sur desktop
+        
         <div className="w-full max-w-2xl mx-auto my-4 md:my-8 bg-black/80 border border-viking-gold/30 rounded-lg p-4 md:p-6 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-sm relative overflow-hidden">
             
-            {/* Message si bloqué */}
+           
             {isBlocked && (
                 <div className="absolute inset-0 bg-black/80 z-20 flex items-center justify-center animate-fade-in p-4 text-center">
                     <button 
                         onClick={togglePlay}
-                        // MODIF : text-xs sur mobile, text-base sur desktop
+                       
                         className="px-4 py-2 md:px-6 md:py-3 bg-viking-gold text-black font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_20px_rgba(212,175,55,0.6)] text-xs md:text-sm"
                     >
                         🔊 Activer l'Ambiance Sonore
@@ -100,15 +100,15 @@ const VikingPlayer = ({ src, autoPlay = false }) => {
                 src={src} 
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={() => setIsPlaying(false)}
-                onLoadedMetadata={(e) => setDuration(formatTime(e.target.duration))} // Charge la durée dès le début
+                onLoadedMetadata={(e) => setDuration(formatTime(e.target.duration))} 
             />
 
-            {/* MODIF : gap-4 sur mobile */}
+           
             <div className="flex items-center gap-4 md:gap-6 relative z-10">
-                {/* Bouton Play/Pause */}
+               
                 <button 
                     onClick={togglePlay}
-                    // MODIF : w-12 h-12 sur mobile
+                   
                     className={`w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center rounded-full border-2 border-viking-gold transition-all duration-300 ${isPlaying ? 'bg-viking-gold text-black shadow-[0_0_15px_rgba(212,175,55,0.5)]' : 'text-viking-gold hover:bg-viking-gold/20'}`}
                 >
                     {isPlaying ? (
@@ -118,22 +118,21 @@ const VikingPlayer = ({ src, autoPlay = false }) => {
                     )}
                 </button>
 
-                {/* Info & Visualiseur */}
+               
                 <div className="flex-1 min-w-0">
-                    {/* MODIF : text-[9px] sur mobile */}
+                  
                     <div className="flex justify-between text-[9px] md:text-[10px] text-viking-gold font-mono mb-2 uppercase tracking-widest opacity-80">
                         <span>{currentTime}</span>
-                        <span className="hidden sm:inline">{isPlaying ? "Lecture..." : "Pause"}</span> {/* Masqué sur très petit écran */}
+                        <span className="hidden sm:inline">{isPlaying ? "Lecture..." : "Pause"}</span> 
                         <span>{duration}</span>
                     </div>
 
-                    {/* Zone Visualiseur */}
-                    {/* MODIF : h-8 sur mobile */}
+                    
                     <div className="h-8 md:h-10 flex items-end justify-center mb-3 overflow-hidden opacity-80">
                         {bars}
                     </div>
 
-                    {/* Barre de progression */}
+                    
                     <div 
                         className="h-1.5 bg-stone-800 rounded-full cursor-pointer relative group"
                         onClick={handleSeek}

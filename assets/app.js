@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -15,12 +15,34 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ArticleShow from './components/ArticleShow';
 
-// NOUVEAU : Import de la page Dashboard Admin
+// Import de la page Dashboard Admin
 import AdminDashboard from './pages/AdminDashboard';
 
 console.log("🐲 Démarrage de l'application DragonCMS...");
 
 const App = () => {
+    
+    // --- SYSTÈME DE CHARGEMENT DU DESIGN (VERSION SILENCIEUSE) ---
+    useEffect(() => {
+        fetch('/design_config.json')
+            .then(response => {
+                // Si le fichier n'existe pas, on renvoie null sans faire d'erreur
+                if (!response.ok) return null;
+                return response.json();
+            })
+            .then(data => {
+                // On n'applique la couleur que si le fichier a été trouvé et contient la donnée
+                if (data && data.primaryColor) {
+                    document.documentElement.style.setProperty('--viking-orange', data.primaryColor);
+                    console.log("🎨 Design chargé depuis la forge :", data.primaryColor);
+                }
+            })
+            .catch(() => {
+                // En cas d'erreur réseau, on ne log plus d'erreur rouge
+                // Le village utilise simplement les couleurs du CSS par défaut
+            });
+    }, []); 
+
     return (
         <BrowserRouter>
             <div className="min-h-screen flex flex-col font-sans text-viking-parchment">
@@ -40,13 +62,10 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/forum" element={<ForumPage />} />
-                        {/* <Route path="/forum/article/:id" element={<ArticlePage />} /> */}
                         <Route path="/article/:id" element={<ArticleShow />} />
                         <Route path="/statistique" element={<StatsPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/login" element={<LoginPage />} />
-                        
-                        {/* NOUVELLE ROUTE : Salle du Conseil (Admin) */}
                         <Route path="/admin" element={<AdminDashboard />} />
                     </Routes>
                 </div>

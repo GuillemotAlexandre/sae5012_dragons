@@ -82,11 +82,10 @@ const DataProviderSpace = ({ datasets }) => {
     };
 
     return (
-        // MODIF : space-y-4 sur mobile pour compacter
+  
         <div className="space-y-4 md:space-y-6 animate-fadeIn">
             
-            {/* Formulaire d'importation */}
-            {/* MODIF : p-4 sur mobile */}
+    
             <div className="bg-black/40 p-4 md:p-6 border border-viking-gold/30 rounded-lg shadow-xl">
                 <h3 className="text-viking-gold font-dragon text-lg md:text-xl mb-4 uppercase tracking-widest text-center md:text-left">
                     Nouvelle Archive de Données
@@ -119,13 +118,13 @@ const DataProviderSpace = ({ datasets }) => {
                     <div className="bg-black/40 p-3 border-b border-white/5">
                         <span className="text-[10px] font-black uppercase text-viking-gold/50">Analyse de la structure</span>
                     </div>
-                    {/* Le scroll horizontal est géré ici par overflow-x-auto */}
+                   
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-black/60">
                                     {headers.map(h => (
-                                        // MODIF : min-w pour forcer la largeur et activer le scroll
+                                       
                                         <th key={h} className="p-3 md:p-4 border-r border-white/5 min-w-[140px] align-top">
                                             <div className="text-viking-parchment text-xs font-bold mb-2 truncate" title={h}>{h}</div>
                                             <button 
@@ -142,7 +141,7 @@ const DataProviderSpace = ({ datasets }) => {
                                 {preview.map((row, i) => (
                                     <tr key={i} className="border-t border-white/5 hover:bg-white/5 transition-colors">
                                         {headers.map(h => (
-                                            // MODIF : whitespace-nowrap pour éviter les retours à la ligne moches dans les cellules
+                                           
                                             <td key={h} className="p-3 md:p-4 text-[10px] md:text-[11px] text-stone-400 border-r border-white/5 italic whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis">
                                                 {row[h]}
                                             </td>
@@ -155,11 +154,11 @@ const DataProviderSpace = ({ datasets }) => {
                 </div>
             )}
 
-            {/* Archives existantes */}
+  
             <div className="mt-8 md:mt-12">
                 <h3 className="text-viking-gold/40 font-dragon text-sm mb-4 md:mb-6 uppercase tracking-widest border-b border-viking-gold/20 pb-2">Registres déjà présents</h3>
                 
-                {/* MODIF : grid responsive 1 -> 2 -> 3 colonnes */}
+  
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {datasets?.length > 0 ? datasets.map(ds => (
                         <div key={ds.id} className="p-4 bg-black/20 border border-stone-800 hover:border-viking-gold/40 transition-all group rounded">
