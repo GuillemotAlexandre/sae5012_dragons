@@ -33,7 +33,7 @@ const CommentItem = ({ comment, articleId, onReply }) => {
                     <ReplyForm parentId={comment.id} articleId={articleId} onSuccess={() => {setShowReply(false); onReply();}} />
                 )}
 
-                {/* Réponses imbriquées */}
+
                 {comment.replies && comment.replies.length > 0 && (
                     <div className="mt-2">
                         {comment.replies.map(reply => (
@@ -82,7 +82,7 @@ const ReplyForm = ({ parentId, articleId, onSuccess }) => {
 };
 
 const CommentsSection = ({ articleId, comments, refresh }) => {
-    // On ne garde que les commentaires racines (ceux sans parent) pour l'affichage initial
+
     const rootComments = comments.filter(c => !c.parent);
 
     return (

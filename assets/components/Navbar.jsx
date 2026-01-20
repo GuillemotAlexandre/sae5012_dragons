@@ -35,7 +35,7 @@ const Navbar = () => {
                     <span className="text-2xl md:text-4xl group-hover:scale-110 transition-transform uppercase">Riders of Berk</span> 
                 </Link>
 
-                {/* BOUTON BURGER (Z-50 pour rester cliquable) */}
+                {/* BOUTON BURGER */}
                 <button 
                     className="md:hidden text-viking-gold z-50 focus:outline-none relative"
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -80,7 +80,7 @@ const Navbar = () => {
                         )}
                     </ul>
 
-                    {/* SECTION UTILISATEUR (Connexion / Déconnexion) */}
+                    {/* Connexion / Déconnexion */}
                     <div className="flex flex-col md:flex-row items-center gap-6 md:gap-4 md:border-l border-stone-700 md:pl-6 mt-8 md:mt-0">
                         {!token ? (
                             <>

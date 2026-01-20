@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Entity\Comment;
-use App\Entity\Rating; // 👈 Import de l'entité Rating
+use App\Entity\Rating; 
 use App\Entity\Vote;
 use App\Form\ArticleType;
 use App\Form\CommentType;

@@ -5,7 +5,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell 
 } from 'recharts';
 
-const COLORS = ['#d4af37', '#b91c1c', '#1c1917', '#57534e', '#a8a29e']; // Couleurs Viking
+const COLORS = ['#d4af37', '#b91c1c', '#1c1917', '#57534e', '#a8a29e']; 
 
 const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
     const [data, setData] = useState([]);
@@ -51,7 +51,7 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
     const xKey = keys[0];
     const yKey = keys[1];
 
-    // MODIF : Style commun pour les axes (police plus petite)
+
     const axisStyle = { fontSize: '10px', fill: '#a8a29e' };
 
     const renderChart = () => {
@@ -75,7 +75,6 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            // MODIF : Label simplifié pour mobile
                             label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                             outerRadius="70%" 
                             fill="#8884d8"
@@ -106,8 +105,7 @@ const CsvChart = ({ csvUrl, vizType = 'bar' }) => {
     };
 
     return (
-        // MODIF : h-full et w-full pour prendre tout l'espace disponible du parent
-        // Le padding est géré par le parent (ArticleForm/Show)
+  
         <div className="w-full h-full min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
                 {renderChart()}

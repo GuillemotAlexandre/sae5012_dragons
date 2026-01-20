@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// 👇 1. IMPORT DU GRAPHIQUE (Indispensable)
+
 import CsvChart from './CsvChart'; 
 
 const ArticleForm = ({ id = null, onSuccess }) => {
@@ -7,13 +7,13 @@ const ArticleForm = ({ id = null, onSuccess }) => {
     const [summary, setSummary] = useState('');
     const [blocs, setBlocs] = useState([]);
     
-    // Initialisation avec des tableaux vides pour éviter les crashs
+    
     const [musicLibrary, setMusicLibrary] = useState([]);
     const [datasetLibrary, setDatasetLibrary] = useState([]); 
 
     const [loading, setLoading] = useState(false);
 
-    // --- 1. CHARGEMENT DES DONNÉES DE L'ARTICLE (SI MODIFICATION) ---
+   
     useEffect(() => {
         if (id) {
             setLoading(true);
@@ -23,25 +23,25 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                     setTitle(data.title);
                     setSummary(data.summary);
                     
-                    // On formate les blocs reçus de l'API pour qu'ils marchent dans le formulaire
+                  
                     const formattedBlocs = (data.blocs || [])
                         .sort((a, b) => a.position - b.position)
                         .map(b => {
                             let vizType = 'bar';
                             let content = b.content || '';
                             
-                            // Si c'est un graphique, on sépare le type et l'URL (format "type::url")
+                          
                             if (b.type === 'stats' || b.type === 'viz') {
                                 const parts = content.split('::');
                                 vizType = parts[0] || 'bar';
-                                content = parts[1] || ''; // L'URL du CSV devient le content/mediaUrl
+                                content = parts[1] || ''; 
                             }
 
                             return {
-                                id: b.id, // On garde l'ID pour savoir que ce bloc existe déjà
+                                id: b.id, 
                                 type: b.type,
-                                content: content, // Texte ou URL
-                                mediaUrl: content, // Pour prévisualiser images/sons
+                                content: content, 
+                                mediaUrl: content, 
                                 vizType: vizType,
                                 file: null
                             };
@@ -57,9 +57,9 @@ const ArticleForm = ({ id = null, onSuccess }) => {
         }
     }, [id]);
 
-    // --- CHARGEMENT DES LIBRAIRIES (Musique / Datasets) ---
+
     useEffect(() => {
-        // 1. Musiques
+    
         fetch('/api/music/list')
             .then(res => res.ok ? res.json() : [])
             .then(data => {
@@ -67,7 +67,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             })
             .catch(err => console.error("Erreur musique", err));
 
-        // 2. Datasets
         fetch('/api/list-datasets') 
             .then(res => {
                 if (!res.ok) throw new Error("Erreur API Dataset");
@@ -86,7 +85,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             });
     }, []);
 
-    // --- GESTION DES BLOCS ---
     const addBloc = (type) => {
         setBlocs([...blocs, { 
             type, 
@@ -94,7 +92,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
             mediaUrl: '', 
             vizType: 'bar', 
             file: null,   
-            // Pas d'ID ici, c'est un nouveau bloc
+            
         }]);
     };
 
@@ -118,7 +116,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
         }
     };
 
-    // --- SOUMISSION (HYBRIDE : POST ou PATCH) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -126,9 +123,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
         try {
             if (id) {
-                // 📝 MODE ÉDITION (PATCH JSON)
-                // Attention : L'upload de nouveaux fichiers image n'est pas géré ici pour simplifier.
-                // On met à jour textes, titres, choix musique/stats.
 
                 const articleData = {
                     title,
@@ -136,25 +130,24 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                     blocs: blocs.map((bloc, index) => {
                         let finalContent = bloc.content;
 
-                        // On reconstruit le format spécial pour les stats
                         if (bloc.type === 'stats') {
-                            // Si l'utilisateur a changé l'URL via le select, c'est dans bloc.mediaUrl
+                          
                             finalContent = `${bloc.vizType}::${bloc.mediaUrl}`;
                         } else if (bloc.type === 'music') {
-                            finalContent = bloc.mediaUrl; // Le nom du fichier choisi
+                            finalContent = bloc.mediaUrl; 
                         } else if (bloc.type === 'image') {
-                            // Si pas de nouveau fichier, on garde l'ancienne URL
+                          
                             finalContent = bloc.mediaUrl; 
                         }
 
-                        // Structure d'un bloc pour l'API
+                       
                         const blocPayload = {
                             type: bloc.type,
                             position: index + 1,
                             content: finalContent
                         };
 
-                        // Si le bloc avait déjà un ID, on l'envoie pour le mettre à jour (au lieu de le recréer)
+                     
                         if (bloc.id) {
                             blocPayload['@id'] = `/api/blocs/${bloc.id}`;
                         }
@@ -167,7 +160,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                     method: 'PATCH',
                     headers: { 
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/merge-patch+json' // Standard API Platform
+                        'Content-Type': 'application/merge-patch+json' 
                     },
                     body: JSON.stringify(articleData)
                 });
@@ -180,8 +173,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                 }
 
             } else {
-                // ✨ MODE CRÉATION (POST FormData)
-                // C'est ton code d'origine qui gère bien l'upload initial
                 const formData = new FormData();
                 formData.append('title', title);
                 formData.append('summary', summary);
@@ -232,15 +223,12 @@ const ArticleForm = ({ id = null, onSuccess }) => {
     };
 
     return (
-        // MODIF : p-4 sur mobile, max-w-4xl pour limiter sur desktop
         <form onSubmit={handleSubmit} className="bg-stone-900 p-4 md:p-8 border border-stone-800 shadow-2xl max-w-4xl mx-auto">
-            {/* MODIF : Taille titre */}
             <h2 className="text-2xl md:text-3xl font-dragon text-viking-gold mb-6 md:mb-8 text-center uppercase">
                 {id ? 'Modifier la Chronique' : 'Nouvelle Chronique'}
             </h2>
 
             <div className="mb-6">
-                {/* MODIF : p-3 sur mobile */}
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-black/50 border border-stone-700 text-white p-3 md:p-4 text-xl md:text-2xl outline-none focus:border-viking-gold" placeholder="Titre..." required />
             </div>
             <div className="mb-8">
@@ -249,7 +237,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
             <div className="space-y-6 mb-8">
                 {blocs.map((bloc, index) => (
-                    // MODIF : p-4 sur mobile
                     <div key={bloc.id || index} className="bg-stone-800/50 p-4 md:p-6 border-l-4 border-viking-gold relative">
                         <button type="button" onClick={() => removeBloc(index)} className="absolute top-2 right-2 text-stone-500 hover:text-red-500 text-xs font-bold uppercase transition p-2">Supprimer</button>
                         <p className="text-viking-gold text-xs uppercase font-bold mb-4 tracking-widest">Bloc {index + 1} : {bloc.type}</p>
@@ -268,7 +255,6 @@ const ArticleForm = ({ id = null, onSuccess }) => {
 
                         {/* Stats */}
                         {bloc.type === 'stats' && (
-                            // MODIF : grid-cols-1 sur mobile pour empiler contrôles et graphique
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-4">
                                     <div>
@@ -331,7 +317,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                 ))}
             </div>
 
-            {/* MODIF : Barre d'outils responsive avec flex-wrap */}
+           
             <div className="flex flex-wrap gap-2 justify-center mb-10 pb-10 border-b border-stone-800">
                 <ToolBtn label="Titre H2" onClick={() => addBloc('h2')} />
                 <ToolBtn label="Paragraphe" onClick={() => addBloc('paragraph')} />
@@ -347,7 +333,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
     );
 };
 
-// MODIF : Bouton responsive (flex-grow)
+// MODIF : Bouton responsive 
 const ToolBtn = ({ label, onClick }) => (
     <button type="button" onClick={onClick} className="px-4 py-3 md:py-2 bg-stone-800 text-stone-300 border border-stone-700 hover:border-viking-gold hover:text-white transition text-xs uppercase font-bold tracking-wider flex-grow md:flex-grow-0 rounded">
         + {label}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const DesignerSpace = () => {
-    // --- ÉTATS ---
+  
     const VIKING_ORANGE_DEFAULT = '#e67e22'; 
     
     const [globalColor, setGlobalColor] = useState(VIKING_ORANGE_DEFAULT);
@@ -13,7 +13,7 @@ const DesignerSpace = () => {
     });
     const [isSaving, setIsSaving] = useState(false);
 
-    // --- CHARGEMENT INITIAL ---
+ 
     useEffect(() => {
         fetchArticles();
         const currentColor = getComputedStyle(document.documentElement)
@@ -34,7 +34,7 @@ const DesignerSpace = () => {
         }
     };
 
-    // --- ACTIONS FORGE GLOBALE ---
+   
     const handleGlobalColorPreview = (newColor) => {
         setGlobalColor(newColor);
         document.documentElement.style.setProperty('--viking-orange', newColor);
@@ -77,7 +77,7 @@ const DesignerSpace = () => {
         }
     };
 
-    // --- ACTIONS CHRONIQUES ---
+  
     const handleArticleSelect = (e) => {
         const id = e.target.value;
         setSelectedArticleId(id);
@@ -126,7 +126,7 @@ const DesignerSpace = () => {
 
     return (
         <div className="space-y-10 p-6 max-w-5xl mx-auto">
-            {/* 1. SECTION FORGE GLOBALE */}
+  
             <section className="bg-stone-900 border border-viking-gold/20 p-6 rounded-lg shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-dragon text-viking-gold uppercase tracking-widest">Forge Globale (Site)</h2>
@@ -150,7 +150,6 @@ const DesignerSpace = () => {
                 </button>
             </section>
 
-            {/* 2. SECTION STYLE DES CHRONIQUES (CORRIGÉE POUR L'APERÇU) */}
             <section className="bg-stone-900 border border-blue-500/20 p-6 rounded-lg shadow-xl">
                 <h2 className="text-xl font-dragon text-blue-400 mb-6 uppercase tracking-widest">Style des Chroniques (Articles)</h2>
                 
@@ -178,7 +177,7 @@ const DesignerSpace = () => {
                         </div>
                     </div>
 
-                    {/* APERÇU CORRIGÉ : Utilise la classe et la variable CSS de App.css */}
+     
                     <div className="bg-stone-950 p-6 rounded-lg border border-stone-800 flex flex-col justify-center min-h-[180px]">
                         <h3 
                             style={{ "--article-title-color": articleStyles.titleColor }} 
