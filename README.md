@@ -22,6 +22,7 @@ Clonez la branche finale du projet :
 
 
 git clone -b branche-Alex https://github.com/GuillemotAlexandre/sae5012_dragons.git
+
 cd sae5012_dragons
 
 # 1. Installer les paquets PHP
