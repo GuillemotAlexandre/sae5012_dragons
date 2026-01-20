@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import DataProviderSpace from '../components/DataProviderSpace';
 import { Link } from 'react-router-dom';
 import ArticleForm from '../components/ArticleForm';
+import DesignerSpace from '../components/DesignerSpace'; // Ensure this path is correct!
 
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
@@ -97,15 +98,12 @@ const AdminDashboard = () => {
     if (!data) return <div className="text-yellow-500 p-10 font-dragon animate-pulse text-center">Appel au Grand Conseil...</div>;
 
     return (
-        // MODIF : p-4 sur mobile, p-6 sur desktop
         <div className="max-w-6xl mx-auto p-4 md:p-6 text-white pb-20">
-            {/* MODIF : Taille du titre réduite sur mobile */}
             <h1 className="text-3xl md:text-5xl font-dragon text-viking-parchment mb-6 md:mb-10 border-b border-viking-gold/30 pb-4 uppercase text-center md:text-left">
                 Palais d'Administration
             </h1>
 
             {/* Navigation par Onglets responsive */}
-            {/* MODIF : flex-wrap permet aux boutons de passer à la ligne sur mobile */}
             <div className="flex flex-wrap gap-2 mb-8 border-b border-stone-800 pb-4 justify-center md:justify-start">
                 <button onClick={() => setActiveTab('stats')} className={`flex-grow md:flex-grow-0 px-4 py-3 md:py-2 text-xs font-black uppercase transition rounded md:rounded-none ${activeTab === 'stats' ? 'bg-viking-gold text-black' : 'bg-stone-900 text-stone-500 border border-stone-800'}`}>Vue d'ensemble</button>
                 
@@ -153,7 +151,6 @@ const AdminDashboard = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         {data.allUsers?.filter(u => u.pseudo.toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
-                            // MODIF : flex-col sur mobile pour empiler pseudo et bouton
                             <div key={u.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-stone-900/50 border border-stone-800 gap-3">
                                 <div>
                                     <p className="font-bold text-viking-parchment text-lg">{u.pseudo}</p>
@@ -184,7 +181,6 @@ const AdminDashboard = () => {
                         ) : (
                             <div className="grid gap-3">
                                 {data.managementArticles?.map(art => (
-                                    // MODIF : flex-col sur mobile pour empiler titre et boutons
                                     <div key={art.id} className="p-4 bg-stone-900 border border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:border-stone-600 transition-colors group gap-4">
                                         
                                         <div className="flex-1 w-full">
@@ -199,7 +195,6 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
                                         
-                                        {/* MODIF : w-full sur mobile, boutons en pleine largeur */}
                                         <div className="flex items-center gap-3 w-full sm:w-auto">
                                             <button 
                                                 onClick={() => setEditingId(art.id)}
@@ -233,10 +228,10 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {/* ONGLET DESIGN (TON NOUVEL ESPACE) */}
+                {/* ONGLET DESIGN */}
                 {activeTab === 'design' && isDesigner && (
                     <div className="animate-in fade-in duration-700">
-                        <DesignerSpace />
+                        <DesignerSpace/>
                     </div>
                 )}
             </div>
