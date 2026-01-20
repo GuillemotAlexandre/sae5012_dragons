@@ -81,8 +81,17 @@ class Dataset
     {
         return $this->source;
     }
+    
     public function setSource(string $source): self
     {
+        // On définit le dossier où sont stockés les fichiers
+        $basePath = '/data/stats/';
+
+        // Si la source ne commence PAS DÉJÀ par le chemin, on l'ajoute
+        if (!str_starts_with($source, $basePath)) {
+            $source = $basePath . $source;
+        }
+
         $this->source = $source;
         return $this;
     }
@@ -91,6 +100,7 @@ class Dataset
     {
         return $this->metadata;
     }
+    
     public function setMetadata(?array $metadata): self
     {
         $this->metadata = $metadata ?? [];

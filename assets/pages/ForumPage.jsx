@@ -157,10 +157,10 @@ const ForumPage = () => {
                             onChange={(e) => setSortOrder(e.target.value)}
                             className="w-full sm:w-auto bg-black/50 border border-viking-gold/50 text-viking-gold py-3 px-4 rounded cursor-pointer uppercase text-xs font-bold tracking-widest focus:outline-none focus:border-viking-gold hover:bg-stone-900 transition"
                         >
-                            <option value="newest">📅 Plus Récents</option>
-                            <option value="oldest">📜 Plus Anciens</option>
-                            <option value="best_rating">🌟 Mieux Notés</option>
-                            <option value="worst_rating">💀 Moins Notés</option>
+                            <option value="newest">Plus Récents</option>
+                            <option value="oldest">Plus Anciens</option>
+                            <option value="best_rating">Mieux Notés</option>
+                            <option value="worst_rating">Moins Notés</option>
                         </select>
 
                         {/* 🔒 BOUTON CRÉER */}

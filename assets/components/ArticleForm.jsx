@@ -300,7 +300,7 @@ const ArticleForm = ({ id = null, onSuccess }) => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-black/20 border border-stone-800 flex items-center justify-center min-h-[200px] rounded p-2 overflow-hidden">
+                                <div className="bg-white/20 border border-stone-800 flex items-center justify-center min-h-[200px] rounded p-2 overflow-hidden">
                                     {bloc.mediaUrl ? (
                                         <div className="w-full h-full min-h-[200px]">
                                              <CsvChart csvUrl={bloc.mediaUrl} vizType={bloc.vizType || 'bar'} />
