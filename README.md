@@ -21,7 +21,7 @@ Suivez ces étapes scrupuleusement pour installer le projet sur votre machine (W
 Clonez la branche finale du projet :
 
 
-git clone -b new-backup-raph [https://github.com/GuillemotAlexandre/sae5012_dragons.git](https://github.com/GuillemotAlexandre/sae5012_dragons.git)
+git clone -b branche-Alex https://github.com/GuillemotAlexandre/sae5012_dragons.git
 cd sae5012_dragons
 
 # 1. Installer les paquets PHP
@@ -90,3 +90,25 @@ L'API utilise le format standard **JSON-LD** / **Hydra**. Voici les principaux p
 | :--- | :--- | :--- |
 | **Users** | `GET`, `PUT`, `DELETE` | Gestion des comptes utilisateurs et attribution des rôles (`ROLE_ADMIN`, `ROLE_PROVIDER`, etc.). |
 | **Datasets** | `CRUD Complète` | Upload et gestion des fichiers CSV pour l'analyse de données (Espace Fournisseur). |
+
+
+
+
+
+
+utilisateur : 
+
+admin@admin.fr
+
+auteur@berk.fr
+
+designer@berk.fr
+
+editeur@berk.fr
+
+scribe@berk.fr
+
+user@berk.fr
+
+mot de passe pour tous les utilisateur :
+1234
