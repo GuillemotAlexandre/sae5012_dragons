@@ -33,6 +33,7 @@ php bin/console doctrine:database:create
 
 # 3. Créer la structure des tables (migration)
 php bin/console make:migration
+
 php bin/console doctrine:migrations:migrate --no-interaction
 
 # 4. Charger les fausses données (Fixtures)
